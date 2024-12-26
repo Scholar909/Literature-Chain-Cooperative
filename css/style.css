@@ -1,0 +1,508 @@
+html{
+    scroll-behavior: smooth;
+}
+
+body{
+    font-family: 'Times New Roman', Times, serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+header{
+    background-color: #333;
+    color: white;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+header .logo{
+    font-size: 1.5rem;
+}
+
+header.logo h1{
+    margin: 0;
+}
+
+header nav ul{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 1rem;
+}
+
+header nav ul li a{
+    color: white;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+header nav ul li a:hover{
+    color: #0f0f0f;
+}
+
+.hero{
+    text-align: center;
+    padding: 2rem;
+    background-color: #444;
+    color: #fff;
+}
+
+#search input{
+    padding: 0.5rem;
+    margin-right: 0.5rem;
+    border-radius: 16px;
+}
+
+#search{
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+main{
+    padding: 1rem;
+}
+
+#categories{
+    margin-bottom: 2rem;
+}
+
+.categories-list{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: space-around;
+    padding: 1rem;
+}
+
+.category{
+    background-color: #333;
+    color: #fff;
+    padding: 1rem;
+    border-radius: 5px;
+    text-align: center;
+    flex: 1;
+}
+
+#request, #about, #contact, #cart, #books-available{
+    margin-top: 2rem;
+    padding: 1rem;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#cart #cart-items{
+    padding: 0.5rem;
+    background: white;
+    margin-bottom: 0.5rem;
+    border: 1px solid #ccc;
+    max-height: 300px;
+    overflow-y: scroll;
+    background-color: #f7f2f2dc;
+}
+
+#books-available .books-search{
+    position: relative;
+    display: inline-block;
+    width: 300px;
+    display: flex;
+    gap: 1rem;
+}
+
+#clear-btn{
+    position: absolute;
+    right: 125px;
+    top: 20%;
+    transform: translateY(-50%);
+    background-color: #fdfdfddc;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    display: none;
+    color: #888;
+    z-index: 1;
+}
+
+#clear-btn:hover{
+    color: #f3efef;
+    background-color: #333;
+}
+
+#books-available button{
+    height: 20px;
+}
+
+#books-available .book-list{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 0.5rem;
+    background: white;
+    margin-bottom: 0.5rem;
+    border: 1px solid #ccc;
+    max-height: 450px;
+    overflow-y: scroll;
+    background-color: #f7f2f2dc;
+}
+
+#books-available .book-list a{
+    text-decoration: none;
+}
+
+#books-available .book-list .services{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    width: 95%;
+}
+
+#books-available .book-list .services .service{
+    flex: 1;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+    border: none;
+    transition: border 0.3s;
+}
+
+#books-available .book-list .services .service:hover{
+    border-radius: 5px;
+    border: 0.5px solid rgba(0, 0, 0, 0.253);
+}
+
+#books-available .book-list .services .service h3{
+    margin-top: 5px;
+    margin-left: 27px;
+}
+
+#books-available .book-list .services .service h3 a{
+    color: white;
+    font-size: 18px;
+    margin-left: 5px;
+    background-color: #000;
+    padding: 5px;
+    border-radius: 60px;
+}
+
+#books-available .book-list .services .service h3 a i{
+    background-color: white;
+    font-size: 16px;
+    border-radius: 50%;
+    padding: 3px;
+    color: black;
+}
+
+#books-available .book-list .services .service button{
+    margin-bottom: 2rem;
+    margin-left: 27px;
+}
+
+#books-available .book-list img{
+    max-width: 100%;
+    height: 250px;
+    width: 150px;
+    border-radius: 5px;
+    border: 0.5px solid rgba(0, 0, 0, 0.253);
+    margin-left: 10px;
+    margin-top: 10px;
+}
+
+.result-box ul{
+    max-height: 150px;
+    max-width: 300px;
+    overflow-y: scroll;
+    background-color: #f7f2f2dc;
+    position: absolute;
+    top: 630px;
+    left: 280px;
+    
+}
+
+.result-box ul li{
+    list-style-type: none;
+    border-radius: 3px;
+    padding: 10px 8px;
+    cursor: pointer;
+}
+
+.result-box ul li:hover{
+    background-color: #f0e9e9e8;
+}
+
+#cart-items{
+    list-style: none;
+    padding: 0;
+}
+
+#cart-items li{
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem;
+    background: white;
+    margin-bottom: 0.5rem;
+    border: 1px solid #ccc;
+}
+
+#request form input, #request form textarea, #request form button{
+    display: block;
+    width: 100%;
+    margin: 0.5rem 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.services button{
+    border-radius: 14px;
+    border: 1px solid #7e7979;
+}
+
+.services button:hover{
+    background-color: #444;
+    color: white;
+    transition: 0.5s ease;
+}
+
+#contact .talk p a{
+    text-decoration: none;
+    color: black;
+}
+
+footer{
+    text-align: center;
+    background-color: #333;
+    color: white;
+    padding: 1rem;
+}
+
+footer ul {
+    display: flex;
+    list-style: none;
+    justify-content: center;
+    gap: 1rem;
+}
+
+footer ul li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: white;
+}
+
+footer a{
+    text-decoration: none;
+    color: white;
+}
+
+
+
+@media screen and (max-width: 788px) {
+    html, body{
+        overflow-x: clip;
+    }
+
+    header{
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+    }
+
+    header .logo h1{
+        font-size: 27px;
+        margin-left: 0px;
+        align-items: left;
+    }
+
+    header .logo p{
+        font-size: 18px;
+    }
+
+    .nav-list{
+        margin-top: 10px;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    .nav-list ul{
+        background-color: #7e7979;
+        border-radius: 4px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        gap: 2px;
+    }
+
+    .nav-list ul li a{
+        font-size: 16px;
+        flex-shrink: 0;
+        padding: 4px 4px;
+        border-radius: 4px;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .nav-list ul li a:hover{
+        background-color: #333;
+        color: #fff;
+    }
+}
+
+@media screen and (max-width: 761px){
+    html, body{
+        overflow-x: clip;
+    }
+
+    .nav-list ul{
+        gap: 6px;
+    }
+
+    .nav-list ul li a{
+        font-size: 14px;
+    }
+}
+
+@media screen and (max-width: 764px){
+    .nav-list ul{
+        gap: 5px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    html, body{
+        overflow-x: clip;
+    }
+
+    .nav-list ul{
+        gap: 2px;
+    }
+
+    .nav-list ul li a{
+        font-size: 11px;
+    }
+
+    #books-available .book-list .services{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #books-availble h2, h4, .books-search{
+        gap: 5px;
+    }
+
+    footer #socials ul{
+        align-items: center;
+        margin-right: 35px;
+    }
+}
+
+@media screen and (max-width: 415px) {
+    html, body{
+        overflow-x: clip;
+    }
+
+    .nav-list ul{
+        gap: 1px;
+    }
+
+    .nav-list ul li a{
+        font-size: 11px;
+    }
+
+    #books-available .book-list .services{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #books-availble h2, h4, .books-search{
+        gap: 5px;
+    }
+
+    footer #socials ul{
+        align-items: center;
+        margin-right: 35px;
+    }
+}
+
+@media screen and (max-width: 430px) {
+    html, body{
+        overflow-x: clip;
+    }
+}
+
+@media screen and (max-width: 412px) {
+    html, body{
+        overflow-x: clip;
+    }
+}
+
+@media screen and (max-width: 390px) {
+    html, body{
+        overflow-x: clip;
+    }
+}
+
+@media screen and (max-width: 344px){
+    html, body{
+        overflow-x: clip;
+    }
+    
+    footer #socials ul{
+        font-size: 13px;
+    }
+
+    footer p{
+        font-size: 11px;
+    }
+
+    footer #socials .follow{
+        font-size: 18px;
+    }
+}
+
+@media screen and (max-width: 295px) {
+    html, body{
+        overflow-x: clip;
+    }
+
+    #books-available .book-list .services .service h3 a{
+        font-size: 16px;
+    }
+
+    #books-available .book-list .services .service h3 a i{
+        font-size: 14px;
+    }
+
+    #books-available .book-list{
+        overflow-x: clip;
+    }
+
+    #books-available .book-list .services{
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        align-items: center;
+    }
+    
+    #books-available .book-list .services .service h3{
+        font-size: 15px;
+    }
+
+    footer #socials ul{
+        gap: 5px;
+    }
+}
