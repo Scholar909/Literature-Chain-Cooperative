@@ -360,13 +360,13 @@ footer a{
     }
 
     .result-box ul{
-        max-height: 150px;
-        max-width: 100px;
+        max-height: 200px;
+        max-width: 130px;
         overflow-y: scroll;
         background-color: #f7f2f2dc;
         position: absolute;
-        top: 660px;
-        left: 245px;
+        top: 833px;
+        left: 35px;
         
     }
 }
@@ -397,11 +397,11 @@ footer a{
     }
 
     .nav-list ul{
-        gap: 0.5px;
+        gap: 0px;
     }
 
     .nav-list ul li a{
-        font-size: 8px;
+        font-size: 6px;
     }
 
     footer #socials ul{
