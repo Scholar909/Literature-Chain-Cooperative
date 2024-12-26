@@ -391,6 +391,7 @@ footer a{
 
     .nav-list ul li a{
         font-size: 10.5px;
+        overflow-x: scroll;
     }
 
     footer #socials ul{
