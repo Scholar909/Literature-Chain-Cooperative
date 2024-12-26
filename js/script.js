@@ -96,25 +96,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-
-document.querySelector('#request-form').addEventListener('submit', function(e){
-    e.preventDefault();
-    const name = document.querySelector('#name').value;
-    const email = document.querySelector('#email').value;
-    const bookRequest = document.querySelector('#book-request').value;
-
-    const message = `Name: ${name}\nEmail: ${email}\nBook Request: ${bookRequest}`;
-
-    const whatsappUrl = `https://wa.me/2349168873680?text=${encodeURIComponent(message)}`;
-
-    window.open(whatsappUrl, '_blank');
-});
-
-
-const rawNumber = document.querySelector("#whatsapp-number").value;
-const formattedNumber = formatWhatsappNumber(rawNumber);
-console.log(formattedNumber);
-
 let availableKeywords = [
     'SOUP-A-STAR COOKBOOK',
     'A-TIME-TO-EAT COOKBOOK',
@@ -171,6 +152,24 @@ inputBox.onkeyup = function(){
         resultsBox.innerHTML = '';
     }
 }
+
+document.querySelector('#request-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    const name = document.querySelector('#name').value;
+    const email = document.querySelector('#email').value;
+    const bookRequest = document.querySelector('#book-request').value;
+
+    const message = `Name: ${name}\nEmail: ${email}\nBook Request: ${bookRequest}`;
+
+    const whatsappUrl = `https://wa.me/2349168873680?text=${encodeURIComponent(message)}`;
+
+    window.open(whatsappUrl, '_blank');
+});
+
+
+const rawNumber = document.querySelector("#whatsapp-number").value;
+const formattedNumber = formatWhatsappNumber(rawNumber);
+console.log(formattedNumber);
 
 function display(result){
     const content = result.map((list=>{
