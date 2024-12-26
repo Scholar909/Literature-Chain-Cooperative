@@ -380,6 +380,32 @@ footer a{
     }
 }
 
+@media screen and (max-width: 720px){
+    html, body{
+        overflow-x: clip;
+    }
+
+    .nav-list ul{
+        gap: 1px;
+    }
+
+    .nav-list ul li a{
+        font-size: 10.5px;
+    }
+
+    footer #socials ul{
+        font-size: 11px;
+    }
+
+    footer p{
+        font-size: 10px;
+    }
+
+    footer #socials .follow{
+        font-size: 14px;
+    }
+}
+
 @media screen and (max-width: 480px) {
     html, body{
         overflow-x: clip;
