@@ -386,12 +386,11 @@ footer a{
     }
 
     .nav-list ul{
-        gap: 1px;
+        gap: 0.5px;
     }
 
     .nav-list ul li a{
-        font-size: 10.5px;
-        overflow-x: scroll;
+        font-size: 8px;
     }
 
     footer #socials ul{
