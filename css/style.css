@@ -385,10 +385,6 @@ footer a{
         overflow-x: clip;
     }
 
-    .nav-list{
-        overflow: visible;
-    }
-
     .nav-list ul{
         gap: 0.5px;
     }
