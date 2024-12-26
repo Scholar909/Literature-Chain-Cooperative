@@ -397,7 +397,14 @@ footer a{
     }
 
     .nav-list ul{
+        padding: auto;
         gap: 0px;
+        overflow-x: auto;
+        display: inline-block;
+    }
+
+    .nav-list ul li{
+        display: inline-block;
     }
 
     .nav-list ul li a{
@@ -414,6 +421,11 @@ footer a{
 
     footer #socials .follow{
         font-size: 14px;
+    }
+
+    .result-box ul{
+        top: 1000px;
+        
     }
 }
 
