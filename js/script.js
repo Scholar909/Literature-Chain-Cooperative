@@ -60,9 +60,11 @@ document.addEventListener("DOMContentLoaded", () => {
     updateCartCount();
 
     addToCartButtons.forEach((button) => {
-        button.addEventListener("click", () => {
+        button.addEventListener("click", (event) => {
+            const serviceDiv = event.target.closest('.service');
             const product = button.parentElement;
             const productName = product.querySelector("h3").textContent;
+            const buyLink = serviceDiv.querySelector('.buy-now').getAttribute('href');
 
             if (cart.has(productName)){
                 alert(`${productName} has already been added to the cart.`);
@@ -76,7 +78,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 cartItems.innerHTML = "";
             }
             const cartItem = document.createElement("li");
+            const link = document.createElement('a');
+
             cartItem.textContent = productName;
+            link.textContent = "Buy Now";
+            link.href = buyLink;
+            link.target = "_blank";
 
             const deleteButton = document.createElement("button");
             deleteButton.textContent = "X";
@@ -89,6 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             });
 
+            cartItem.appendChild(link);
             cartItem.appendChild(deleteButton);
             cartItems.appendChild(cartItem);
         });
