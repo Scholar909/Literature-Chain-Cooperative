@@ -12,97 +12,70 @@ function updateAvailableBooksCount(){
 }
 updateAvailableBooksCount();
 
-
 document.addEventListener("DOMContentLoaded", () => {
     const cartItems = document.getElementById("cart-items");
-    const addToCartButtons = document.querySelectorAll(".add-to-cart");
     const cartCount = document.getElementById("cart-count");
 
-    const cart = new Set(JSON.parse(localStorage.getItem("cart")) || []);
+    function updateCart(){
+        let items = JSON.parse(localStorage.getItem("cart")) || [];
 
-    const updateCartCount = () => {
-        cartCount.textContent = cart.size;
+        items = items.filter((item) => item.productName !== undefined && item.productName.trim() !== "");
+        localStorage.setItem("cart", JSON.stringify(items));
 
-        localStorage.setItem("cart", JSON.stringify([...cart]));
-    };
+        cartItems.innerHTML = items.length ? items.map((item) => `<li><a href="${item.link}" target ="_blank">${item.productName}</a> <button class="RemoveFromCart" data-title="${item.productName}">Remove</button></li>`).join(""): "<li>Your cart is empty</li>";
 
-    const populateCart = () => {
-        cartItems.innerHTML = "";
+        updateCartCount(items.length);
 
-        if (cart.size === 0){
-            cartItems.innerHTML = "<li>Your cart is empty.</li>";
-        } else {
-            cart.forEach((productName) => {
-                const cartItem = document.createElement("li");
+        document.querySelectorAll(".RemoveFromCart").forEach((button) => {
+            button.addEventListener("click", () => {
+                const productName = button.getAttribute("data-title");
 
-                cartItem.textContent = productName;
-
-                const deleteButton = document.createElement("button");
-                deleteButton.textContent = "X";
-
-                deleteButton.addEventListener("click", () => {
-                    cart.delete(productName);
-
-                    cartItem.remove();
-                    updateCartCount();
-                    if (cart.size === 0){
-                        cartItems.innerHTML = "<li>Your cart is empty.</li>";
-                    }
-                });
-
-                cartItem.appendChild(deleteButton);
-                cartItems.appendChild(cartItem);
+                removeItemFromCart(productName);
             });
+        });
+    }
+
+    function updateCartCount(count) {
+        cartCount.innerText = count;
+    }
+
+    function addToCart(productName, link){
+        if (!productName || !link){
+            console.error("Error: Missing title or link.");
+            return;
         }
-    };
 
-    populateCart();
-    updateCartCount();
+        const items = JSON.parse(localStorage.getItem("cart")) || [];
 
-    addToCartButtons.forEach((button) => {
-        button.addEventListener("click", (event) => {
-            const serviceDiv = event.target.closest('.service');
-            const product = button.parentElement;
-            const productName = product.querySelector("h3").textContent;
-            const buyLink = serviceDiv.querySelector('.buy-now').getAttribute('href');
+        const itemExist = items.some((item) => item.productName === productName);
 
-            if (cart.has(productName)){
-                alert(`${productName} has already been added to the cart.`);
-                return;
-            }
+        if (itemExist){
+            alert("This products has already been added to the cart.");
+            return;
+        }
 
-            cart.add(productName);
-            updateCartCount();
+        items.push({productName, link});
+        localStorage.setItem("cart", JSON.stringify(items));
+        updateCart();
+    }
 
-            if (cartItems.querySelector("li").textContent === "Your cart is empty."){
-                cartItems.innerHTML = "";
-            }
-            const cartItem = document.createElement("li");
-            const link = document.createElement('a');
+    function removeItemFromCart(productName) {
+        let items = JSON.parse(localStorage.getItem("cart")) || [];
+        items = items.filter((item) => item.productName !== productName);
+        localStorage.setItem("cart", JSON.stringify(items));
+        updateCart();
+    }
 
-            cartItem.textContent = productName;
-            link.textContent = "Buy Now";
-            link.href = buyLink;
-            link.target = "_blank";
-
-            const deleteButton = document.createElement("button");
-            deleteButton.textContent = "X";
-            deleteButton.addEventListener("click", () => {
-                cart.delete(productName);
-                cartItem.remove();
-                updateCartCount();
-                if (cartItems.children.length === 0){
-                    cartItems.innerHTML = "<li>Your cart is empty.<li>";
-                }
-            });
-
-            cartItem.appendChild(link);
-            cartItem.appendChild(deleteButton);
-            cartItems.appendChild(cartItem);
+    document.querySelectorAll(".add-to-cart").forEach((button) => {
+        button.addEventListener("click", () => {
+            const serviceDiv = button.parentElement;
+            const productName = serviceDiv.querySelector("h3").innerText;
+            const link = serviceDiv.querySelector(".buy-now").href;
+            addToCart(productName, link);
         });
     });
+    updateCart();
 });
-
 
 let availableKeywords = [
     'SOUP-A-STAR COOKBOOK',
