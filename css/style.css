@@ -293,6 +293,10 @@ main{
     color: black;
 }
 
+#contact .talk #visitors{
+    color: #000;
+}
+
 footer{
     text-align: center;
     background-color: #333;
