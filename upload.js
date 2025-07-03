@@ -75,6 +75,28 @@ homeLink?.addEventListener("click", async (e) => {
 /* ----------  HELPERS  ---------- */
 const $ = (sel) => document.querySelector(sel);
 
+/* ----------  COMPRESS IMAGE ---------- */
+function compressImage(file, maxWidth = 800) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onload = (e) => { img.src = e.target.result; };
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const scale = maxWidth / img.width;
+      canvas.width = maxWidth;
+      canvas.height = img.height * scale;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob((blob) => {
+        const newFile = new File([blob], file.name, { type: "image/jpeg" });
+        resolve(newFile);
+      }, "image/jpeg", 0.7); // 70% quality
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 /* ----------  UPLOAD TO FIREBASE STORAGE WITH PROGRESS ---------- */
 function uploadToFirebaseStorage(file, onProgress) {
   return new Promise((resolve, reject) => {
@@ -84,7 +106,6 @@ function uploadToFirebaseStorage(file, onProgress) {
 
     uploadTask.on('state_changed',
       (snapshot) => {
-        // Calculate progress percentage
         const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         onProgress(progress);
       },
@@ -106,6 +127,7 @@ $("#uploadForm")?.addEventListener("submit", async (e) => {
 
   const progressBar = document.getElementById("uploadProgress");
   progressBar.style.width = "0";
+  progressBar.style.opacity = "1";
   progressBar.style.display = "block";
 
   const title = $("#bookTitle")?.value.trim();
@@ -118,13 +140,12 @@ $("#uploadForm")?.addEventListener("submit", async (e) => {
 
   const fileInput = $("#bookImg");
   const file = fileInput?.files[0];
-
   let imgURL = "";
 
   try {
     if (file) {
-      // Upload image to Firebase Storage with progress bar update
-      imgURL = await uploadToFirebaseStorage(file, (progress) => {
+      const compressedFile = await compressImage(file);
+      imgURL = await uploadToFirebaseStorage(compressedFile, (progress) => {
         progressBar.style.width = progress + "%";
       });
     }
@@ -151,6 +172,7 @@ $("#uploadForm")?.addEventListener("submit", async (e) => {
     setTimeout(() => {
       progressBar.style.display = "none";
       progressBar.style.width = "0";
+      progressBar.style.opacity = "0";
     }, 800);
   }
 });

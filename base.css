@@ -824,16 +824,14 @@ body.light-mode #footer a {
 
 /* Progress bar fixed at top of page */
 #uploadProgress {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 5px;
+  height: 6px;
   width: 0;                /* Start with zero width */
   background: var(--accent);
   box-shadow: 0 0 10px var(--accent);
-  transition: width 0.3s ease;
+  transition: width 0.3s ease, opacity 0.3s ease;
   z-index: 1500;
-  border-radius: 0 0 4px 4px;
+  opacity: 0;
+  border-radius: 4px;
   display: none;           /* Hidden by default */
 }
 
