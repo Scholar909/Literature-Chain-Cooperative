@@ -1,4 +1,3 @@
-// upload.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import {
   getAuth,
@@ -14,7 +13,7 @@ import {
 import {
   getStorage,
   ref,
-  uploadBytes,
+  uploadBytesResumable,
   getDownloadURL
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-storage.js";
 
@@ -27,8 +26,6 @@ const firebaseConfig = {
   messagingSenderId: "510180440268",
   appId:             "1:510180440268:web:83b530662644de04d8ea69"
 };
-
-const IMGBB_API_KEY = "76b5c9b8204181e4bb53f33eb96b8efb";   // replace with your own key if you use imgbb
 
 /* ----------  INIT  ---------- */
 const app   = initializeApp(firebaseConfig);
@@ -61,7 +58,6 @@ homeLink?.addEventListener("click", async (e) => {
   e.preventDefault();
   try {
     await signOut(auth);
-    // ensure tokens are gone before leaving the page
     await new Promise((resolve) => {
       const unsub = onAuthStateChanged(auth, (u) => {
         if (!u) {
@@ -73,20 +69,32 @@ homeLink?.addEventListener("click", async (e) => {
   } catch (err) {
     console.error("Sign-out error:", err);
   }
-  location.replace("index.html");       // prevents landing back on the protected page via Back button
+  location.replace("index.html");
 });
 
 /* ----------  HELPERS  ---------- */
 const $ = (sel) => document.querySelector(sel);
 
-async function uploadToImgbb(file) {
-  const fd = new FormData();
-  fd.append("image", file);
-  fd.append("key", IMGBB_API_KEY);
-  const res  = await fetch("https://api.imgbb.com/1/upload", { method: "POST", body: fd });
-  const json = await res.json();
-  if (!json.success) throw new Error("imgbb upload failed");
-  return json.data.url;
+/* ----------  UPLOAD TO FIREBASE STORAGE WITH PROGRESS ---------- */
+function uploadToFirebaseStorage(file, onProgress) {
+  return new Promise((resolve, reject) => {
+    const fileName = `books/${Date.now()}_${file.name}`;
+    const storageRef = ref(store, fileName);
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    uploadTask.on('state_changed',
+      (snapshot) => {
+        // Calculate progress percentage
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        onProgress(progress);
+      },
+      (error) => reject(error),
+      async () => {
+        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+        resolve(downloadURL);
+      }
+    );
+  });
 }
 
 /* ----------  FORM SUBMIT  ---------- */
@@ -96,10 +104,15 @@ $("#uploadForm")?.addEventListener("submit", async (e) => {
   const submitBtn = $("#uploadForm button[type='submit']");
   submitBtn.disabled = true;
 
+  const progressBar = document.getElementById("uploadProgress");
+  progressBar.style.width = "0";
+  progressBar.style.display = "block";
+
   const title = $("#bookTitle")?.value.trim();
   if (!title) {
     alert("Book title is required.");
     submitBtn.disabled = false;
+    progressBar.style.display = "none";
     return;
   }
 
@@ -110,8 +123,10 @@ $("#uploadForm")?.addEventListener("submit", async (e) => {
 
   try {
     if (file) {
-      // Upload image file directly to ImgBB only
-      imgURL = await uploadToImgbb(file);
+      // Upload image to Firebase Storage with progress bar update
+      imgURL = await uploadToFirebaseStorage(file, (progress) => {
+        progressBar.style.width = progress + "%";
+      });
     }
 
     const docData = {
@@ -124,12 +139,18 @@ $("#uploadForm")?.addEventListener("submit", async (e) => {
     };
 
     await addDoc(collection(db, "books"), docData);
+
     alert("Uploaded!");
     e.target.reset();
 
   } catch (err) {
-    alert(err.message);
+    alert("Upload failed: " + err.message);
   } finally {
     submitBtn.disabled = false;
+    progressBar.style.width = "100%";
+    setTimeout(() => {
+      progressBar.style.display = "none";
+      progressBar.style.width = "0";
+    }, 800);
   }
 });
