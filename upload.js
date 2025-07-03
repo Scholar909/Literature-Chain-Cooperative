@@ -33,6 +33,9 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const store = getStorage(app);
 
+/* ---------- NEW:  ImgBB API KEY ---------- */
+const imgbbApiKey = "76b5c9b8204181e4bb53f33eb96b8efb";
+
 /* ---------- THEME ---------- */
 const modeBtn = document.getElementById("modeToggle"),
   icon = modeBtn?.querySelector("i");
@@ -105,32 +108,51 @@ function compressImage(file, maxWidth = 800) {
   });
 }
 
-/* ---------- UPLOAD TO FIREBASE STORAGE ---------- */
-function uploadToFirebaseStorage(file, onProgress) {
+/* ---------- NEW:  UPLOAD TO ImgBB (with progress) ---------- */
+function uploadToImgBB(file, onProgress) {
   return new Promise((resolve, reject) => {
-    const fileName = `books/${Date.now()}_${file.name}`;
-    const storageRef = ref(store, fileName);
-    const uploadTask = uploadBytesResumable(storageRef, file);
+    const formData = new FormData();
+    formData.append("image", file);
 
-    uploadTask.on('state_changed',
-      (snapshot) => {
-        const total = snapshot.totalBytes || file.size;  // fallback to file size
-        const progress = Math.round((snapshot.bytesTransferred / total) * 100);
-        onProgress(progress);
-      },
-      (error) => reject(error),
-      async () => {
-        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-        resolve(downloadURL);
-      }
+    const xhr = new XMLHttpRequest();
+    xhr.open(
+      "POST",
+      `https://api.imgbb.com/1/upload?key=${imgbbApiKey}`,
+      true
     );
+
+    xhr.upload.addEventListener("progress", (e) => {
+      if (e.lengthComputable) {
+        const progress = Math.round((e.loaded / e.total) * 100);
+        onProgress(progress);
+      }
+    });
+
+    xhr.onload = () => {
+      try {
+        const res = JSON.parse(xhr.responseText);
+        if (xhr.status === 200 && res.success) {
+          resolve(res.data.url);
+        } else {
+          reject(new Error("Image upload failed."));
+        }
+      } catch {
+        reject(new Error("ImgBB response parsing failed."));
+      }
+    };
+
+    xhr.onerror = () => reject(new Error("Network error during ImgBB upload"));
+    xhr.send(formData);
   });
 }
+
+/* ---------- (optional)  OLD Firebase-Storage uploader kept for reuse ---------- */
+/*  function uploadToFirebaseStorage(...) { ... }  */
 
 /* ---------- FORM SUBMIT ---------- */
 $("#uploadForm")?.addEventListener("submit", async (e) => {
   e.preventDefault();
-  alert('Upload Triggered')
+  alert("Upload Triggered");
 
   const submitBtn = $("#uploadForm button[type='submit']");
   const progressBar = $("#uploadProgress");
@@ -150,25 +172,20 @@ $("#uploadForm")?.addEventListener("submit", async (e) => {
 
   const fileInput = $("#bookImg");
   const file = fileInput?.files[0];
-  let imgURL = ""; // Default = empty string = means "show title only"
+  let imgURL = ""; // empty → front-end will just show the title as cover text
 
   try {
     if (file) {
-      try {
-        console.log("Compressing...");
-        const compressedFile = await compressImage(file);
-        console.log("Uploading...");
-        imgURL = await uploadToFirebaseStorage(compressedFile, (progress) => {
-          console.log("Progress:", progress + "%");
-          progressBar.style.width = progress + "%";
-        });
-        console.log("Uploaded:", imgURL);
-      } catch (err) {
-        console.error("Image upload failed:", err);
-        alert("Image upload failed: " + err.message);
-      }
+      console.log("Compressing…");
+      const compressedFile = await compressImage(file);
+      console.log("Uploading to ImgBB…");
+      imgURL = await uploadToImgBB(compressedFile, (p) => {
+        console.log("Progress:", p + "%");
+        progressBar.style.width = p + "%";
+      });
+      console.log("Uploaded:", imgURL);
     } else {
-      // No image selected – do nothing; just leave imgURL = ""
+      /* nothing picked → leave imgURL = "" so cover shows title only */
       progressBar.style.width = "100%";
     }
 
