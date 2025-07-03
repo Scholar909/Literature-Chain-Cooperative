@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>LitChain</title>
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="base.css">
+  <link rel="stylesheet" href="rating.css">
+</head>
+<body>
+  <header id="header">
+    <div class="logo"><img src="logo.png" alt="Book-Run"> LiTChain</div>
+    <button id="adminUploadBtn" class="icon-btn" title="Admin"><i class="bx bx-cloud-upload"></i></button>
+  </header>
+
+  <button id="modeToggle" title="Toggle theme"><i class="bx bx-sun"></i></button>
+
+  <nav id="nav">
+    <button id="navToggle" class="icon-btn"><i class="bx bx-chevron-down"></i></button>
+    <ul id="navList" class="hidden">
+      <li><a href="#intro">Intro</a></li>
+      <li><a href="#search">Search</a></li>
+      <li><a href="#books">Books</a></li>
+      <li><a href="#request">Help</a></li>
+      <li><a href="#contact">Contact</a></li>
+      <li><a href="#reviews">Reviews</a></li>
+    </ul>
+  </nav>
+
+  <section id="intro" class="card-section">
+    <h1>Welcome to Book-Run</h1>
+    <div class="inner-card">
+      <p>Browse our curated catalogue, grab a copy, and leave us a sparkling review ⭐. Find the book, course, novel or content you seek all in one place.</p>
+    </div>
+  </section>
+
+  <section id="search" class="card-section">
+    <h2>Find a Book</h2>
+    <div class="inner-card">
+      <form id="searchForm">
+        <input type="text" id="searchTitle" placeholder="Search by title">
+        <select id="searchCategory"><option value="">All categories</option></select>
+        <button type="submit" class="icon-btn"><i class="bx bx-search"></i></button>
+      </form>
+    </div>
+  </section>
+
+  <section id="books" class="card-section">
+    <h2>Books (<span id="bookCount">0</span>)</h2>
+    <div class="inner-card">
+      <div id="bookGrid" class="book-grid"></div>
+    </div>
+  </section>
+
+  <button id="cartBtn" class="floating-cart hidden" draggable="true">
+    <i class="bx bx-cart"></i><span id="cartCount">0</span>
+  </button>
+
+  <section id="request" class="card-section">
+    <h2>Need Help?</h2>
+    <div class="inner-card">
+      <select id="reqType" class="form-control">
+        <option value="complaint">Make Complaint</option>
+        <option value="request">Make Request</option>
+      </select>
+      <textarea id="reqMsg" class="form-control" placeholder="Type your message…"></textarea>
+      <button id="reqSend" class="primary-btn">Send</button>
+    </div>
+  </section>
+
+  <!-- ░░ CONTACT (MODIFIED) ░░ -->
+  <section id="contact" class="card-section">
+    <h2>Contact Us</h2>
+    <div class="inner-card">
+      <ul>
+        <li>Email: <a href="mailto:enehogbole909@gmail.com">admin@literaturechain.com</a></li>
+        <li>WhatsApp: <a href="https://wa.me/2349168873680" target="_blank">Chat Now</a></li>
+        <li>Tel: <a href="tel:+2349168873680">Call Now</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="reviews" class="card-section">
+    <h2>Leave a Review</h2>
+    <div class="inner-card">
+      <form id="reviewForm">
+        <div class="star-widget">
+          <input type="radio" name="rate" id="rate-5" value="5"><label for="rate-5"><i class="bx bxs-star"></i></label>
+          <input type="radio" name="rate" id="rate-4" value="4"><label for="rate-4"><i class="bx bxs-star"></i></label>
+          <input type="radio" name="rate" id="rate-3" value="3"><label for="rate-3"><i class="bx bxs-star"></i></label>
+          <input type="radio" name="rate" id="rate-2" value="2"><label for="rate-2"><i class="bx bxs-star"></i></label>
+          <input type="radio" name="rate" id="rate-1" value="1"><label for="rate-1"><i class="bx bxs-star"></i></label>
+        </div>
+        <textarea id="reviewText" placeholder="Tell us what you think…"></textarea>
+        <button type="submit" class="primary-btn">Post Review</button>
+        <a href="#" class="trustpilot-btn">Rate on SiteJabber</a>
+      </form>
+      <div id="reviewCarousel" class="carousel"></div>
+    </div>
+  </section>
+
+  <footer id="footer">
+    <section id="socials">
+      <p><a href="terms.html">Terms of Service</a> • <a href="next.html">Privacy Policy</a></p>
+      <p class="follow">Follow Us</p>
+      <ul>
+        <li><a href="https://www.facebook.com/profile.php?id=61558115503193"><i class='bx bxl-facebook'></i></a></li>
+        <li><a href="https://twitter.com/intent/follow?screen_name=Yosh1122334455"><i class='bx bxl-twitter'></i></a></li>
+        <li><a href="https://www.tiktok.com/@opportunity_king"><i class='bx bxl-tiktok'></i></a></li>
+        <li><a href="https://www.instagram.com/eneh.ogbole/"><i class='bx bxl-instagram'></i></a></li>
+        <li><a href="https://youtube.com/@skylervalentine909?si=lvyjUorh5ooy_DTp"><i class='bx bxl-youtube'></i></a></li>
+        <li><a href="https://www.linkedin.com/in/eneh-ogbole-ab98b8355?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"><i class='bx bxl-linkedin'></i></a></li>
+      </ul>
+    </section>
+    <p>&copy; <span id="year"></span> LitChain. All rights reserved.</p>
+  </footer>
+
+  <div id="bookModal" class="modal hidden"><div class="modal-content"><button class="close">&times;</button><h3 id="bookModalTitle"></h3><p id="bookModalNotes"></p></div></div>
+  <div id="cartModal" class="modal hidden"><div class="modal-content"><button class="close">&times;</button><h3>Your Cart (<span id="cartModalCount">0</span>)</h3><table id="cartTable"></table></div></div>
+  <div id="loginModal" class="modal hidden">
+    <div class="modal-content">
+      <button class="close">&times;</button>
+      <h3>Admin Login</h3>
+      <form id="loginForm">
+        <input type="email" id="loginEmail" class="form-control" placeholder="Email" required>
+        <input type="password" id="loginPass" class="form-control" placeholder="Password" required>
+        <button type="submit" class="primary-btn">Sign in</button>
+      </form>
+    </div>
+  </div>
+  <!-- ===== EDIT REVIEW MODAL ===== -->
+<div id="editModal" class="modal hidden">
+  <div class="modal-content">
+    <button class="close">&times;</button>
+    <h3>Edit your review</h3>
+
+    <form id="editForm">
+      <div class="star-widget">
+        <input type="radio" name="erate" id="erate-5" value="5">
+        <label for="erate-5">★</label>
+      
+        <input type="radio" name="erate" id="erate-4" value="4">
+        <label for="erate-4">★</label>
+      
+        <input type="radio" name="erate" id="erate-3" value="3">
+        <label for="erate-3">★</label>
+      
+        <input type="radio" name="erate" id="erate-2" value="2">
+        <label for="erate-2">★</label>
+      
+        <input type="radio" name="erate" id="erate-1" value="1">
+        <label for="erate-1">★</label>
+      </div>
+
+      <textarea id="editText" rows="5" placeholder="Update your thoughts..."></textarea>
+
+      <div class="btn-row">
+        <button type="submit" class="primary-btn">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>

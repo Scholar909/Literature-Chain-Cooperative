@@ -1,0 +1,7 @@
+.star-widget{display:flex;justify-content:center;gap:4px;padding:10px}
+.star-widget input{display:none}
+.star-widget label{font-size:28px;color:#666;cursor:pointer;transition:color .2s}
+.star-widget input:not(:checked)+label:hover,
+.star-widget input:not(:checked)+label:hover~label{color:var(--accent)}
+.star-widget input:checked+label,
+.star-widget input:checked+label~label{color:var(--accent)}

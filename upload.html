@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>LitChain | Upload</title>
+
+  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="base.css">
+</head>
+
+<body>
+  <header>
+    <a href="index.html" class="back-link"><i class="bx bx-left-arrow-alt"></i> Back to Store</a>
+  </header>
+
+  <!-- floating theme toggle -->
+  <button id="modeToggle" title="Toggle theme"><i class="bx bx-sun"></i></button>
+
+  <section id="upload" class="card-section upload-card">
+    <h2>Upload a New Book</h2>
+    <form id="uploadForm">
+      <label>Book Image:
+        <input type="file" id="bookImg" accept="image/*" required>
+      </label>
+      <label>Title:
+        <input type="text" id="bookTitle" required>
+      </label>
+      <label>Category:
+        <input type="text" id="bookCategory" required>
+      </label>
+      <label>Buy-Now Link:
+        <input type="url" id="bookLink" required>
+      </label>
+      <label>Notes:
+        <textarea id="bookNotes" rows="3"></textarea>
+      </label>
+      <button type="submit" class="primary-btn">Upload Book</button>
+    </form>
+  </section>
+
+  <script type="module" src="upload.js"></script>
+</body>
+</html>
