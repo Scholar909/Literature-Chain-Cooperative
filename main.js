@@ -42,7 +42,6 @@ onAuthStateChanged(auth, (user) =>
 
 /* --------------------------------------------------
    Everything below waits for the DOM to be parsed
-   so every element exists before we touch it.
 -------------------------------------------------- */
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -71,8 +70,6 @@ document.addEventListener("DOMContentLoaded", () => {
   navToggle?.addEventListener("click", () => {
     const isOpen = nav.classList.toggle("open");
     navToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
-    // Optional: If controlling navList visibility by class, uncomment below:
-    // navList.classList.toggle("hidden", !isOpen);
   });
 
   /* ========= YEAR ========= */
@@ -86,10 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ),
     ].sort();
     const sel = $("#searchCategory");
-    if (!sel) {
-      console.warn("#searchCategory element not found.");
-      return;
-    }
+    if (!sel) return;
     cats.forEach((c) => {
       const o = document.createElement("option");
       o.value = c;
@@ -101,21 +95,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ========= BOOKS ========= */
   const bookGrid = $("#bookGrid");
-  if (!bookGrid) {
-    console.warn("#bookGrid element not found.");
-    return; // stop here, no point continuing without this container
-  }
+  if (!bookGrid) return;
 
   let bookCache = {};
   function makeCard(id, d) {
     const el = document.createElement("div");
     el.className = "book-card";
-    let imgHtml = "";
-    if (d.img) {
-      imgHtml = `<img src="${d.img}" alt="${d.title}">`;
-    } else {
-      imgHtml = `<div class="no-img-placeholder">${d.title}</div>`;
-    }
+
+    const imgHtml = d.img
+      ? `<img src="${d.img}" alt="${d.title}">`
+      : `<div class="no-img-placeholder">${d.title}</div>`;
+
     el.innerHTML = `
       ${imgHtml}
       <div class="info">
@@ -153,7 +143,6 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
   /* ========= SEARCH ========= */
-  // Debounce helper function
   function debounce(func, wait) {
     let timeout;
     return function (...args) {
@@ -174,28 +163,20 @@ document.addEventListener("DOMContentLoaded", () => {
         card.style.display =
           (!t || txt.includes(t)) && (!c || c === cat) ? "flex" : "none";
       });
-    }, 200)); // 200ms debounce
-  } else {
-    console.warn("#searchForm element not found.");
+    }, 200));
   }
 
   /* ========= CART ========= */
   const CART_KEY  = "bookRunCart";
   const cartBtn = $("#cartBtn");
-  if (!cartBtn) {
-    console.warn("#cartBtn element not found.");
-    // continue anyway, but cart features won't work
-  }
 
   const getCart = () => JSON.parse(localStorage.getItem(CART_KEY) || "[]");
   const saveCart = (a) => localStorage.setItem(CART_KEY, JSON.stringify(a));
   const cartUpdate = () => {
     const n = getCart().length;
-    const countElem = $("#cartCount");
-    if (countElem) countElem.textContent = n;
-    if (!cartBtn) return;
-    n ? cartBtn.classList.remove("hidden")
-      : cartBtn.classList.add("hidden");
+    $("#cartCount").textContent = n;
+    n ? cartBtn?.classList.remove("hidden")
+      : cartBtn?.classList.add("hidden");
   };
 
   const addCart = (id, d) => {
@@ -211,40 +192,32 @@ document.addEventListener("DOMContentLoaded", () => {
     cartUpdate();
   };
 
-  if (cartBtn) {
-    cartBtn.addEventListener("click", () => {
-      const tbl  = $("#cartTable");
-      if (!tbl) {
-        console.warn("#cartTable element not found.");
-        return;
-      }
-      tbl.innerHTML = "";
-      const cart = getCart();
-      if (!cart.length) {
-        tbl.innerHTML = "<tr><td>Your cart is empty.</td></tr>";
-      }
-      cart.forEach((it) => {
-        const r = document.createElement("tr");
-        r.innerHTML = `
-          <td>${it.title}<br><small> ...(${it.category})</small></td>
-          <td><a href="${it.link}" class="primary-btn" target="_blank">Buy</a></td>
-          <td><button class="icon-btn del"><i class='bx bx-trash'></i></button></td>`;
-        r.querySelector(".del").addEventListener("click", () => {
-          delCart(it.id);
-          cartBtn.click(); // refresh modal cart content
-        });
-        tbl.appendChild(r);
+  cartBtn?.addEventListener("click", () => {
+    const tbl  = $("#cartTable");
+    if (!tbl) return;
+    tbl.innerHTML = "";
+    const cart = getCart();
+    if (!cart.length) tbl.innerHTML = "<tr><td>Your cart is empty.</td></tr>";
+    cart.forEach((it) => {
+      const r = document.createElement("tr");
+      r.innerHTML = `
+        <td>${it.title}<br><small>...(${it.category})</small></td>
+        <td><a href="${it.link}" class="primary-btn" target="_blank">Buy</a></td>
+        <td><button class="icon-btn del"><i class='bx bx-trash'></i></button></td>`;
+      r.querySelector(".del").addEventListener("click", () => {
+        delCart(it.id);
+        cartBtn.click();
       });
-      const countModal = $("#cartModalCount");
-      if (countModal) countModal.textContent = cart.length;
-      openModal("#cartModal");
+      tbl.appendChild(r);
     });
-  }
+    $("#cartModalCount").textContent = cart.length;
+    openModal("#cartModal");
+  });
   cartUpdate();
 
   /* ========= DRAG CART BUTTON ========= */
   (() => {
-    if (!cartBtn) return; // no cart button, skip drag code
+    if (!cartBtn) return;
     let dx, dy;
     cartBtn.addEventListener("pointerdown", (e) => {
       dx = e.clientX - cartBtn.offsetLeft;
@@ -273,67 +246,54 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   /* ========= ADMIN LOGIN ========= */
-  const adminUploadBtn = $("#adminUploadBtn");
-  if (adminUploadBtn) {
-    adminUploadBtn.addEventListener("click", () => openModal("#loginModal"));
-  }
-  const loginForm = $("#loginForm");
-  if (loginForm) {
-    loginForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      signInWithEmailAndPassword(auth, $("#loginEmail").value, $("#loginPass").value)
-        .then(() => (location.href = "upload.html"))
-        .catch((err) => alert(err.message));
-    });
-  }
+  $("#adminUploadBtn")?.addEventListener("click", () => openModal("#loginModal"));
+  $("#loginForm")?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    signInWithEmailAndPassword(auth, $("#loginEmail").value, $("#loginPass").value)
+      .then(() => (location.href = "upload.html"))
+      .catch((err) => alert(err.message));
+  });
 
   /* ========= HELP SEND (WhatsApp) ========= */
-  const reqSend = $("#reqSend");
-  if (reqSend) {
-    reqSend.addEventListener("click", async () => {
-      const msg  = $("#reqMsg").value.trim(),
-            type = $("#reqType").value;
-      if (!msg) return alert("Enter message");
+  $("#reqSend")?.addEventListener("click", async () => {
+    const msg  = $("#reqMsg").value.trim(),
+          type = $("#reqType").value;
+    if (!msg) return alert("Enter message");
 
-      const email = (auth.currentUser && auth.currentUser.email) || "visitor@guest";
-      const text  = encodeURIComponent(`[*${type}*] \n${msg} \n............. \n(from ${email})`);
-      const url   = `https://api.callmebot.com/whatsapp.php?phone=2348118663849&text=${text}&apikey=4093230`;
+    const email = (auth.currentUser && auth.currentUser.email) || "visitor@guest";
+    const text  = encodeURIComponent(`[*${type}*]\n${msg}\n.............\n(from ${email})`);
+    const url   = `https://api.callmebot.com/whatsapp.php?phone=2348118663849&text=${text}&apikey=4093230`;
 
-      try { await fetch(url); alert("Sent!"); $("#reqMsg").value = ""; }
-      catch { alert("Send Successful."); }
-    });
-  }
+    try { await fetch(url); alert("Sent!"); $("#reqMsg").value = ""; }
+    catch { alert("Send Successful."); }
+  });
 
   /* ========= REVIEWS ========= */
-  const reviewForm = $("#reviewForm");
-  if (reviewForm) {
-    reviewForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      if (!auth.currentUser) {
-        try { await signInWithPopup(auth, provider); }
-        catch { alert("Google sign-in cancelled. Review not posted."); return; }
-      }
+  $("#reviewForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!auth.currentUser) {
+      try { await signInWithPopup(auth, provider); }
+      catch { alert("Google sign-in cancelled. Review not posted."); return; }
+    }
+    const rating = [...$$('#reviewForm input[name="rate"]')].find(r => r.checked)?.value,
+          text   = $("#reviewText").value.trim();
+    if (!rating || !text) return alert("Rate & review!");
 
-      const rating = [...$$('#reviewForm input[name="rate"]')].find(r => r.checked)?.value,
-            text   = $("#reviewText").value.trim();
-      if (!rating || !text) return alert("Rate & review!");
-
-      try {
-        await addDoc(collection(db, "reviews"), {
-          rating : +rating,
-          text,
-          email  : auth.currentUser.email,
-          ts     : serverTimestamp(),
-        });
-        reviewForm.reset();
-      } catch (err) {
-        alert("Failed to post review: " + err.message);
-      }
-    });
-  }
+    try {
+      await addDoc(collection(db, "reviews"), {
+        rating : +rating,
+        text,
+        email  : auth.currentUser.email,
+        ts     : serverTimestamp(),
+      });
+      e.target.reset();
+    } catch (err) {
+      alert("Failed to post review: " + err.message);
+    }
+  });
 
   /* ========= EDIT REVIEW ========= */
-  let currentEditId = null;      // review doc id we’re editing
+  let currentEditId = null;
 
   function openEditModal(id, data) {
     currentEditId = id;
@@ -344,12 +304,10 @@ document.addEventListener("DOMContentLoaded", () => {
     openModal("#editModal");
   }
 
-  const editForm = $("#editForm");
-  if (editForm) {
-    editForm.addEventListener("submit", async (e) => {e.preventDefault();
-    const rating = [...$$('#editForm input[name="erate"]')]
-                     .find(r => r.checked)?.value;
-    const text = $("#editText").value.trim();
+  $("#editForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const rating = [...$$('#editForm input[name="erate"]')].find(r => r.checked)?.value,
+          text   = $("#editText").value.trim();
     if (!rating || !text) return alert("Rate & review!");
 
     try {
@@ -363,59 +321,58 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("Update failed: " + err.message);
     }
   });
-}
 
-/* ========= FORMAT DATE ========= */
-const fmtDate = (ts) =>
-  ts && ts.toDate ? ts.toDate().toLocaleDateString(undefined,
-    { year: "numeric", month: "short", day: "numeric" }) : "";
+  /* ========= FORMAT DATE ========= */
+  const fmtDate = (ts) =>
+    ts && ts.toDate ? ts.toDate().toLocaleDateString(undefined,
+      { year: "numeric", month: "short", day: "numeric" }) : "";
 
-/* ========= REVIEWS CAROUSEL ========= */
-const carousel = $("#reviewCarousel");
-if (carousel) {
-  onSnapshot(
-    query(collection(db, "reviews"), orderBy("ts", "desc")),
-    (snap) => {
-      const mask = (e) => e.replace(/(.{2}).*(@.*)/, "$1***$2");
-      carousel.innerHTML = "";
-      snap.forEach((docSnap) => {
-        const data = docSnap.data();
-        const card = document.createElement("div");
-        card.className = "review-card";
-        const emailIsOwner = auth.currentUser && auth.currentUser.email === data.email;
+  /* ========= REVIEWS CAROUSEL ========= */
+  const carousel = $("#reviewCarousel");
+  if (carousel) {
+    onSnapshot(
+      query(collection(db, "reviews"), orderBy("ts", "desc")),
+      (snap) => {
+        const mask = (e) => e.replace(/(.{2}).*(@.*)/, "$1***$2");
+        carousel.innerHTML = "";
+        snap.forEach((docSnap) => {
+          const data = docSnap.data();
+          const card = document.createElement("div");
+          card.className = "review-card";
+          const emailIsOwner = auth.currentUser && auth.currentUser.email === data.email;
 
-        card.innerHTML = `
-          <div class="review-star">${"★".repeat(data.rating)}${"☆".repeat(5 - data.rating)}</div>
-          <p>${data.text}</p>
-          <div class="review-email">${mask(data.email)}</div>
-          <div class="review-date">${
-            data.updated ? "Last updated: " + fmtDate(data.updated) : fmtDate(data.ts)
-          }</div>
-          ${ emailIsOwner ? `
-              <button class="icon-btn del"><i class='bx bx-trash'></i></button>
-              <button class="icon-btn edit"><i class='bx bx-edit'></i></button>` : "" }`;
+          card.innerHTML = `
+            <div class="review-star">${"★".repeat(data.rating)}${"☆".repeat(5 - data.rating)}</div>
+            <p>${data.text}</p>
+            <div class="review-email">${mask(data.email)}</div>
+            <div class="review-date">${
+              data.updated ? "Last updated: " + fmtDate(data.updated) : fmtDate(data.ts)
+            }</div>
+            ${ emailIsOwner ? `
+                <button class="icon-btn del"><i class='bx bx-trash'></i></button>
+                <button class="icon-btn edit"><i class='bx bx-edit'></i></button>` : "" }`;
 
-        card.querySelector(".edit")?.addEventListener("click",
-          () => openEditModal(docSnap.id, data));
+          card.querySelector(".edit")?.addEventListener("click",
+            () => openEditModal(docSnap.id, data));
 
-        card.querySelector(".del")?.addEventListener("click", async () => {
-          if (confirm("Delete this review?")) {
-            await deleteDoc(doc(db, "reviews", docSnap.id));
-          }
+          card.querySelector(".del")?.addEventListener("click", async () => {
+            if (confirm("Delete this review?")) {
+              await deleteDoc(doc(db, "reviews", docSnap.id));
+            }
+          });
+
+          carousel.appendChild(card);
         });
+      }
+    );
 
-        carousel.appendChild(card);
+    carousel.addEventListener("scroll", () => {
+      const mid = carousel.scrollLeft + carousel.clientWidth / 2;
+      $$(".review-card").forEach((c) => {
+        const r = c.getBoundingClientRect(), cm = r.left + r.width / 2;
+        c.classList.toggle("center", Math.abs(cm - mid) < r.width / 2);
       });
-    }
-  );
-
-  carousel.addEventListener("scroll", () => {
-    const mid = carousel.scrollLeft + carousel.clientWidth / 2;
-    $$(".review-card").forEach((c) => {
-      const r = c.getBoundingClientRect(), cm = r.left + r.width / 2;
-      c.classList.toggle("center", Math.abs(cm - mid) < r.width / 2);
     });
-  });
-}
+  }
 
 });  // end DOMContentLoaded

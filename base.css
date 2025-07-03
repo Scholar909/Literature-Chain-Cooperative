@@ -826,13 +826,13 @@ body.light-mode #footer a {
 #uploadProgress {
   height: 6px;
   width: 0;                /* Start with zero width */
-  background: var(--accent);
+  background: #4caf50;
   box-shadow: 0 0 10px var(--accent);
   transition: width 0.3s ease, opacity 0.3s ease;
-  z-index: 1500;
+  margin: 10px 0;
   opacity: 0;
-  border-radius: 4px;
-  display: none;           /* Hidden by default */
+  border-radius: 4px;   
+  animation: glow 1.5s ease-in-out infinite;/* Hidden by default */
 }
 
 @keyframes glow {
@@ -842,8 +842,4 @@ body.light-mode #footer a {
   50% {
     box-shadow: 0 0 20px var(--accent);
   }
-}
-
-#uploadProgress {
-  animation: glow 1.5s ease-in-out infinite;
 }
