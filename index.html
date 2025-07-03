@@ -4,7 +4,7 @@
   <meta name="google-site-verification" content="LwOdxBGf8lij07ofEEZCAx8-ihcOJMUKS4KYFw3E7Lo" />
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>LitChain</title>
+  <title>LitChain Co. - Literature Chain Cooperative</title>
   <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
   <link rel="stylesheet" href="base.css">
   <link rel="stylesheet" href="rating.css">
@@ -18,14 +18,22 @@
   <button id="modeToggle" title="Toggle theme"><i class="bx bx-sun"></i></button>
 
   <nav id="nav">
-    <button id="navToggle" class="icon-btn"><i class="bx bx-chevron-down"></i></button>
-    <ul id="navList" class="hidden">
-      <li><a href="#intro">Intro</a></li>
-      <li><a href="#search">Search</a></li>
-      <li><a href="#books">Books</a></li>
-      <li><a href="#request">Help</a></li>
-      <li><a href="#contact">Contact</a></li>
-      <li><a href="#reviews">Reviews</a></li>
+    <button id="navToggle" class="icon-btn" aria-expanded="false" aria-controls="navList" aria-label="Toggle menu">
+      <i class="bx bx-chevron-down"></i>
+    </button>
+  
+    <!-- Marquee container next to toggle -->
+    <div id="marqueeContainer" aria-hidden="true">
+      <div id="marqueeText">Welcome to Literature Chain Cooperative</div>
+    </div>
+  
+    <ul id="navList" class="hidden" role="menu" aria-label="Main navigation">
+      <li role="none"><a href="#intro" role="menuitem">Intro</a></li>
+      <li role="none"><a href="#search" role="menuitem">Search</a></li>
+      <li role="none"><a href="#books" role="menuitem">Books</a></li>
+      <li role="none"><a href="#request" role="menuitem">Help</a></li>
+      <li role="none"><a href="#contact" role="menuitem">Contact</a></li>
+      <li role="none"><a href="#reviews" role="menuitem">Reviews</a></li>
     </ul>
   </nav>
 

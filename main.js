@@ -65,9 +65,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ========= NAV ========= */
   const nav = $("#nav");
-  $("#navToggle")?.addEventListener("click", () => {
-    $("#navList")?.classList.toggle("hidden");
-    nav?.classList.toggle("open");
+  const navToggle = $("#navToggle");
+  const navList = $("#navList");
+
+  navToggle?.addEventListener("click", () => {
+    const isOpen = nav.classList.toggle("open");
+    navToggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    // Optional: If controlling navList visibility by class, uncomment below:
+    // navList.classList.toggle("hidden", !isOpen);
   });
 
   /* ========= YEAR ========= */
