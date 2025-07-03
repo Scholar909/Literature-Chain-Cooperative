@@ -86,23 +86,38 @@ document.addEventListener("DOMContentLoaded", () => {
       ),
     ].sort();
     const sel = $("#searchCategory");
+    if (!sel) {
+      console.warn("#searchCategory element not found.");
+      return;
+    }
     cats.forEach((c) => {
       const o = document.createElement("option");
       o.value = c;
       o.textContent = c;
-      sel?.appendChild(o);
+      sel.appendChild(o);
     });
   }
   loadCategories();
 
   /* ========= BOOKS ========= */
   const bookGrid = $("#bookGrid");
-  let   bookCache = {};
+  if (!bookGrid) {
+    console.warn("#bookGrid element not found.");
+    return; // stop here, no point continuing without this container
+  }
+
+  let bookCache = {};
   function makeCard(id, d) {
     const el = document.createElement("div");
     el.className = "book-card";
+    let imgHtml = "";
+    if (d.img) {
+      imgHtml = `<img src="${d.img}" alt="${d.title}">`;
+    } else {
+      imgHtml = `<div class="no-img-placeholder">${d.title}</div>`;
+    }
     el.innerHTML = `
-      <img src="${d.img}" alt="${d.title}">
+      ${imgHtml}
       <div class="info">
         <h4>${d.title}</h4>
         <span>${d.category}</span>
@@ -112,14 +127,17 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
         <button class="icon-btn more"><i class='bx bx-dots-horizontal-rounded'></i></button>
       </div>`;
-    el.querySelector(".more").onclick = () => {
+
+    el.querySelector(".more").addEventListener("click", () => {
       $("#bookModalTitle").textContent = d.title;
       $("#bookModalNotes").textContent = d.notes || "—";
       openModal("#bookModal");
-    };
-    el.querySelector(".add-cart").onclick = () => addCart(id, d);
-    bookGrid?.appendChild(el);
+    });
+
+    el.querySelector(".add-cart").addEventListener("click", () => addCart(id, d));
+    bookGrid.appendChild(el);
   }
+
   onSnapshot(
     query(collection(db, "books"), orderBy("title")),
     (snap) => {
@@ -135,137 +153,184 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
   /* ========= SEARCH ========= */
-  $("#searchForm")?.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const t = $("#searchTitle").value.toLowerCase(),
-          c = $("#searchCategory").value;
-    $$(".book-card").forEach((card) => {
-      const txt = card.querySelector("h4").textContent.toLowerCase(),
-            cat = card.querySelector("span").textContent;
-      card.style.display =
-        (!t || txt.includes(t)) && (!c || c === cat) ? "flex" : "none";
-    });
-  });
+  // Debounce helper function
+  function debounce(func, wait) {
+    let timeout;
+    return function (...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+  }
+
+  const searchForm = $("#searchForm");
+  if (searchForm) {
+    searchForm.addEventListener("submit", debounce((e) => {
+      e.preventDefault();
+      const t = $("#searchTitle").value.toLowerCase(),
+            c = $("#searchCategory").value;
+      $$(".book-card").forEach((card) => {
+        const txt = card.querySelector("h4").textContent.toLowerCase(),
+              cat = card.querySelector("span").textContent;
+        card.style.display =
+          (!t || txt.includes(t)) && (!c || c === cat) ? "flex" : "none";
+      });
+    }, 200)); // 200ms debounce
+  } else {
+    console.warn("#searchForm element not found.");
+  }
 
   /* ========= CART ========= */
   const CART_KEY  = "bookRunCart";
-  const cartBtn   = $("#cartBtn");
-  const getCart   = () => JSON.parse(localStorage.getItem(CART_KEY) || "[]");
-  const saveCart  = (a) => localStorage.setItem(CART_KEY, JSON.stringify(a));
+  const cartBtn = $("#cartBtn");
+  if (!cartBtn) {
+    console.warn("#cartBtn element not found.");
+    // continue anyway, but cart features won't work
+  }
+
+  const getCart = () => JSON.parse(localStorage.getItem(CART_KEY) || "[]");
+  const saveCart = (a) => localStorage.setItem(CART_KEY, JSON.stringify(a));
   const cartUpdate = () => {
     const n = getCart().length;
-    $("#cartCount").textContent = n;
-    n ? cartBtn?.classList.remove("hidden")
-      : cartBtn?.classList.add("hidden");
+    const countElem = $("#cartCount");
+    if (countElem) countElem.textContent = n;
+    if (!cartBtn) return;
+    n ? cartBtn.classList.remove("hidden")
+      : cartBtn.classList.add("hidden");
   };
+
   const addCart = (id, d) => {
     const c = getCart();
     if (c.some((i) => i.id === id)) return;
     c.push({ id, title: d.title, category: d.category, link: d.link });
-    saveCart(c); cartUpdate();
+    saveCart(c);
+    cartUpdate();
   };
+
   const delCart = (id) => {
     saveCart(getCart().filter((i) => i.id !== id));
     cartUpdate();
   };
 
-  cartBtn?.addEventListener("click", () => {
-    const tbl  = $("#cartTable");
-    tbl.innerHTML = "";
-    const cart = getCart();
-    if (!cart.length) {
-      tbl.innerHTML = "<tr><td>Your cart is empty.</td></tr>";
-    }
-    cart.forEach((it) => {
-      const r = document.createElement("tr");
-      r.innerHTML = `
-        <td>${it.title}<br><small>${it.category}</small></td>
-        <td><a href="${it.link}" class="primary-btn" target="_blank">Buy</a></td>
-        <td><button class="icon-btn del"><i class='bx bx-trash'></i></button></td>`;
-      r.querySelector(".del").onclick = () => {
-        delCart(it.id); cartBtn.click();
-      };
-      tbl.appendChild(r);
+  if (cartBtn) {
+    cartBtn.addEventListener("click", () => {
+      const tbl  = $("#cartTable");
+      if (!tbl) {
+        console.warn("#cartTable element not found.");
+        return;
+      }
+      tbl.innerHTML = "";
+      const cart = getCart();
+      if (!cart.length) {
+        tbl.innerHTML = "<tr><td>Your cart is empty.</td></tr>";
+      }
+      cart.forEach((it) => {
+        const r = document.createElement("tr");
+        r.innerHTML = `
+          <td>${it.title}<br><small>${it.category}</small></td>
+          <td><a href="${it.link}" class="primary-btn" target="_blank">Buy</a></td>
+          <td><button class="icon-btn del"><i class='bx bx-trash'></i></button></td>`;
+        r.querySelector(".del").addEventListener("click", () => {
+          delCart(it.id);
+          cartBtn.click(); // refresh modal cart content
+        });
+        tbl.appendChild(r);
+      });
+      const countModal = $("#cartModalCount");
+      if (countModal) countModal.textContent = cart.length;
+      openModal("#cartModal");
     });
-    $("#cartModalCount").textContent = cart.length;
-    openModal("#cartModal");
-  });
+  }
   cartUpdate();
 
   /* ========= DRAG CART BUTTON ========= */
   (() => {
+    if (!cartBtn) return; // no cart button, skip drag code
     let dx, dy;
-    cartBtn?.addEventListener("pointerdown", (e) => {
+    cartBtn.addEventListener("pointerdown", (e) => {
       dx = e.clientX - cartBtn.offsetLeft;
       dy = e.clientY - cartBtn.offsetTop;
       cartBtn.setPointerCapture(e.pointerId);
     });
-    cartBtn?.addEventListener("pointermove", (e) => {
+    cartBtn.addEventListener("pointermove", (e) => {
       if (!e.buttons) return;
       let x = e.clientX - dx, y = e.clientY - dy;
       x = Math.min(innerWidth  - cartBtn.offsetWidth , Math.max(0, x));
       y = Math.min(innerHeight - cartBtn.offsetHeight, Math.max(0, y));
-      cartBtn.style.left = x + "px"; cartBtn.style.top = y + "px";
-      cartBtn.style.right = "auto"; cartBtn.style.bottom = "auto";
+      cartBtn.style.left = x + "px";
+      cartBtn.style.top = y + "px";
+      cartBtn.style.right = "auto";
+      cartBtn.style.bottom = "auto";
     });
   })();
 
   /* ========= MODALS ========= */
   const openModal = (s) => $(s)?.classList.remove("hidden");
   $$(".modal .close").forEach(
-    (b) => (b.onclick = () => b.closest(".modal").classList.add("hidden"))
+    (b) => b.addEventListener("click", () => b.closest(".modal").classList.add("hidden"))
   );
   addEventListener("keydown", (e) => {
     if (e.key === "Escape") $$(".modal").forEach((m) => m.classList.add("hidden"));
   });
 
   /* ========= ADMIN LOGIN ========= */
-  $("#adminUploadBtn")?.addEventListener("click", () => openModal("#loginModal"));
-  $("#loginForm")?.addEventListener("submit", (e) => {
-    e.preventDefault();
-    signInWithEmailAndPassword(auth, $("#loginEmail").value, $("#loginPass").value)
-      .then(() => (location.href = "upload.html"))
-      .catch((err) => alert(err.message));
-  });
+  const adminUploadBtn = $("#adminUploadBtn");
+  if (adminUploadBtn) {
+    adminUploadBtn.addEventListener("click", () => openModal("#loginModal"));
+  }
+  const loginForm = $("#loginForm");
+  if (loginForm) {
+    loginForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      signInWithEmailAndPassword(auth, $("#loginEmail").value, $("#loginPass").value)
+        .then(() => (location.href = "upload.html"))
+        .catch((err) => alert(err.message));
+    });
+  }
 
   /* ========= HELP SEND (WhatsApp) ========= */
-  $("#reqSend")?.addEventListener("click", async () => {
-    const msg  = $("#reqMsg").value.trim(),
-          type = $("#reqType").value;
-    if (!msg) return alert("Enter message");
+  const reqSend = $("#reqSend");
+  if (reqSend) {
+    reqSend.addEventListener("click", async () => {
+      const msg  = $("#reqMsg").value.trim(),
+            type = $("#reqType").value;
+      if (!msg) return alert("Enter message");
 
-    const email = (auth.currentUser && auth.currentUser.email) || "visitor@guest";
-    const text  = encodeURIComponent(`[*${type}*] \n${msg} \n............. \n(from ${email})`);
-    const url   = `https://api.callmebot.com/whatsapp.php?phone=2348118663849&text=${text}&apikey=4093230`;
+      const email = (auth.currentUser && auth.currentUser.email) || "visitor@guest";
+      const text  = encodeURIComponent(`[*${type}*] \n${msg} \n............. \n(from ${email})`);
+      const url   = `https://api.callmebot.com/whatsapp.php?phone=2348118663849&text=${text}&apikey=4093230`;
 
-    try { await fetch(url); alert("Sent!"); $("#reqMsg").value = ""; }
-    catch { alert("Send failed."); }
-  });
+      try { await fetch(url); alert("Sent!"); $("#reqMsg").value = ""; }
+      catch { alert("Send failed."); }
+    });
+  }
 
   /* ========= REVIEWS ========= */
-  $("#reviewForm")?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    if (!auth.currentUser) {
-      try { await signInWithPopup(auth, provider); }
-      catch { alert("Google sign-in cancelled. Review not posted."); return; }
-    }
+  const reviewForm = $("#reviewForm");
+  if (reviewForm) {
+    reviewForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!auth.currentUser) {
+        try { await signInWithPopup(auth, provider); }
+        catch { alert("Google sign-in cancelled. Review not posted."); return; }
+      }
 
-    const rating = [...$$('#reviewForm input[name="rate"]')].find(r => r.checked)?.value,
-          text   = $("#reviewText").value.trim();
-    if (!rating || !text) return alert("Rate & review!");
+      const rating = [...$$('#reviewForm input[name="rate"]')].find(r => r.checked)?.value,
+            text   = $("#reviewText").value.trim();
+      if (!rating || !text) return alert("Rate & review!");
 
-    try {
-      await addDoc(collection(db, "reviews"), {
-        rating : +rating,
-        text,
-        email  : auth.currentUser.email,
-        ts     : serverTimestamp(),
-      });
-      $("#reviewForm").reset();
-    } catch (err) {
-      alert("Failed to post review: " + err.message);
-    }
-  });
+      try {
+        await addDoc(collection(db, "reviews"), {
+          rating : +rating,
+          text,
+          email  : auth.currentUser.email,
+          ts     : serverTimestamp(),
+        });
+        reviewForm.reset();
+      } catch (err) {
+        alert("Failed to post review: " + err.message);
+      }
+    });
+  }
 
   /* ========= EDIT REVIEW ========= */
   let currentEditId = null;      // review doc id we’re editing
@@ -279,8 +344,9 @@ document.addEventListener("DOMContentLoaded", () => {
     openModal("#editModal");
   }
 
-  $("#editForm")?.addEventListener("submit", async (e) => {
-    e.preventDefault();
+  const editForm = $("#editForm");
+  if (editForm) {
+    editForm.addEventListener("submit", async (e) => {e.preventDefault();
     const rating = [...$$('#editForm input[name="erate"]')]
                      .find(r => r.checked)?.value;
     const text = $("#editText").value.trim();
@@ -297,12 +363,16 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("Update failed: " + err.message);
     }
   });
+}
 
-  const fmtDate = (ts) =>
-    ts && ts.toDate ? ts.toDate().toLocaleDateString(undefined,
-      { year: "numeric", month: "short", day: "numeric" }) : "";
+/* ========= FORMAT DATE ========= */
+const fmtDate = (ts) =>
+  ts && ts.toDate ? ts.toDate().toLocaleDateString(undefined,
+    { year: "numeric", month: "short", day: "numeric" }) : "";
 
-  const carousel = $("#reviewCarousel");
+/* ========= REVIEWS CAROUSEL ========= */
+const carousel = $("#reviewCarousel");
+if (carousel) {
   onSnapshot(
     query(collection(db, "reviews"), orderBy("ts", "desc")),
     (snap) => {
@@ -338,12 +408,14 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
   );
-  carousel?.addEventListener("scroll", () => {
+
+  carousel.addEventListener("scroll", () => {
     const mid = carousel.scrollLeft + carousel.clientWidth / 2;
     $$(".review-card").forEach((c) => {
       const r = c.getBoundingClientRect(), cm = r.left + r.width / 2;
       c.classList.toggle("center", Math.abs(cm - mid) < r.width / 2);
     });
   });
+}
 
 });  // end DOMContentLoaded

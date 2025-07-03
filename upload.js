@@ -93,42 +93,57 @@ async function uploadToImgbb(file) {
 $("#uploadForm")?.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const fileInput = $("#bookImg");
-  const file      = fileInput?.files[0];
-  if (!file) {
-    alert("Choose an image first");
+  const submitBtn = $("#uploadForm button[type='submit']");
+  submitBtn.disabled = true;
+
+  const title = $("#bookTitle")?.value.trim();
+  if (!title) {
+    alert("Book title is required.");
+    submitBtn.disabled = false;
     return;
   }
 
-  // upload to Firebase Storage
-  const fileRef     = ref(store, `books/${Date.now()}_${file.name}`);
-  await uploadBytes(fileRef, file);
-  const firebaseURL = await getDownloadURL(fileRef);
+  const fileInput = $("#bookImg");
+  const file = fileInput?.files[0];
 
-  // optional imgbb mirror
-  let imgURL = firebaseURL;
-  if (IMGBB_API_KEY && IMGBB_API_KEY !== "76b5c9b8204181e4bb53f33eb96b8efb") {
-    try {
-      imgURL = await uploadToImgbb(file);
-    } catch (err) {
-      console.warn(err.message);          // fall back to Firebase URL
-    }
-  }
-
-  const docData = {
-    img:      imgURL,
-    title:    $("#bookTitle")?.value.trim(),
-    category: $("#bookCategory")?.value.trim(),
-    link:     $("#bookLink")?.value.trim(),
-    notes:    $("#bookNotes")?.value.trim(),
-    ts:       serverTimestamp()
-  };
+  let imgURL = "";
 
   try {
+    if (file) {
+      // upload to Firebase Storage
+      const fileRef = ref(store, `books/${Date.now()}_${file.name}`);
+      await uploadBytes(fileRef, file);
+      const firebaseURL = await getDownloadURL(fileRef);
+
+      // optional imgbb mirror (only if you use your own key, otherwise skip)
+      if (IMGBB_API_KEY && IMGBB_API_KEY !== "76b5c9b8204181e4bb53f33eb96b8efb") {
+        try {
+          imgURL = await uploadToImgbb(file);
+        } catch (err) {
+          console.warn(err.message); // fallback
+          imgURL = firebaseURL;
+        }
+      } else {
+        imgURL = firebaseURL;
+      }
+    }
+
+    const docData = {
+      img: imgURL,
+      title,
+      category: $("#bookCategory")?.value.trim(),
+      link: $("#bookLink")?.value.trim(),
+      notes: $("#bookNotes")?.value.trim(),
+      ts: serverTimestamp()
+    };
+
     await addDoc(collection(db, "books"), docData);
     alert("Uploaded!");
     e.target.reset();
+
   } catch (err) {
     alert(err.message);
+  } finally {
+    submitBtn.disabled = false;
   }
 });

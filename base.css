@@ -652,3 +652,21 @@ body.light-mode #footer a {
   font-weight: 600;
   letter-spacing: .4px;
 }
+
+.no-img-placeholder {
+  width: 150px;      /* or your intended width */
+  height: 200px;     /* or your intended height */
+  background-color: #ddd;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+  text-align: center;
+  padding: 10px;
+  border-radius: 4px;
+  user-select: none;
+  /* optional */
+  border: 1px solid #aaa;
+}
