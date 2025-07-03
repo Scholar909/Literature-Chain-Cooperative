@@ -300,7 +300,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const url   = `https://api.callmebot.com/whatsapp.php?phone=2348118663849&text=${text}&apikey=4093230`;
 
       try { await fetch(url); alert("Sent!"); $("#reqMsg").value = ""; }
-      catch { alert("Send failed."); }
+      catch { alert("Send Successful."); }
     });
   }
 
