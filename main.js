@@ -226,7 +226,7 @@ document.addEventListener("DOMContentLoaded", () => {
       cart.forEach((it) => {
         const r = document.createElement("tr");
         r.innerHTML = `
-          <td>${it.title}<br><small>${it.category}</small></td>
+          <td>${it.title}<br><small> ...(${it.category})</small></td>
           <td><a href="${it.link}" class="primary-btn" target="_blank">Buy</a></td>
           <td><button class="icon-btn del"><i class='bx bx-trash'></i></button></td>`;
         r.querySelector(".del").addEventListener("click", () => {
@@ -376,7 +376,7 @@ if (carousel) {
   onSnapshot(
     query(collection(db, "reviews"), orderBy("ts", "desc")),
     (snap) => {
-      const mask = (e) => e.replace(/(.{4}).*(@.*)/, "$1***$2");
+      const mask = (e) => e.replace(/(.{2}).*(@.*)/, "$1***$2");
       carousel.innerHTML = "";
       snap.forEach((docSnap) => {
         const data = docSnap.data();

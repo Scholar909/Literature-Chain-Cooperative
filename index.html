@@ -29,7 +29,6 @@
   
     <ul id="navList" class="hidden" role="menu" aria-label="Main navigation">
       <li role="none"><a href="#intro" role="menuitem">Intro</a></li>
-      <li role="none"><a href="#search" role="menuitem">Search</a></li>
       <li role="none"><a href="#books" role="menuitem">Books</a></li>
       <li role="none"><a href="#request" role="menuitem">Help</a></li>
       <li role="none"><a href="#contact" role="menuitem">Contact</a></li>
@@ -44,18 +43,18 @@
     </div>
   </section>
 
-  <section id="search" class="card-section">
+  <section id="books" class="card-section">
     <h2>Find a Book</h2>
-    <div class="inner-card">
+    <div id="search" class="inner-card">
       <form id="searchForm">
         <input type="text" id="searchTitle" placeholder="Search by title">
         <select id="searchCategory"><option value="">All categories</option></select>
         <button type="submit" class="icon-btn"><i class="bx bx-search"></i></button>
       </form>
     </div>
-  </section>
-
-  <section id="books" class="card-section">
+    <br>
+    <br>
+    <br>
     <h2>Books (<span id="bookCount">0</span>)</h2>
     <div class="inner-card">
       <div id="bookGrid" class="book-grid"></div>

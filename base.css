@@ -497,51 +497,6 @@ body.light-mode #modeToggle {
   filter: brightness(0.8);
 }
 
-/*
-.book-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-  gap: 1rem;
-  max-height: 70vh;
-  overflow-y: auto;
-  margin-top: 1.6rem;
-}
-
-.book-card {
-  background: var(--card-bg);
-  backdrop-filter: blur(12px);
-  border-radius: var(--radius-card);
-  display: flex;
-  flex-direction: column;
-  box-shadow: var(--shadow);
-  transition: 0.25s;
-}
-
-.book-card:hover {
-  transform: translateY(-4px);
-}
-
-.book-card img {
-  width: 100%;
-  aspect-ratio: 3/4;
-  object-fit: cover;
-}
-
-.book-card .info {
-  padding: 0.9rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-}
-
-.book-card .btn-row {
-  display: flex;
-  gap: 0.45rem;
-  margin-top: auto;
-}
-*/
-
 /* Card styling for any books-section tables */
 #books table {
   width: 100%;
@@ -838,4 +793,31 @@ body.light-mode #footer a {
   user-select: none;
   /* optional */
   border: 1px solid #aaa;
+}
+
+#reviewCarousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory; /* optional, for snapping */
+  -webkit-overflow-scrolling: touch; /* smooth scrolling on iOS */
+  gap: 1rem; /* space between cards */
+  padding: 1rem 0;
+  scrollbar-width: thin; /* for Firefox */
+}
+
+.review-card {
+  flex: 0 0 250px; /* fixed width so they don't shrink */
+  scroll-snap-align: center;
+  background: #aaa;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+.review-card.center {
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
