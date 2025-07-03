@@ -114,35 +114,22 @@ function uploadToImgBB(file, onProgress) {
     const formData = new FormData();
     formData.append("image", file);
 
-    const xhr = new XMLHttpRequest();
-    xhr.open(
-      "POST",
-      `https://api.imgbb.com/1/upload?key=${imgbbApiKey}`,
-      true
-    );
-
-    xhr.upload.addEventListener("progress", (e) => {
-      if (e.lengthComputable) {
-        const progress = Math.round((e.loaded / e.total) * 100);
-        onProgress(progress);
-      }
-    });
-
-    xhr.onload = () => {
-      try {
-        const res = JSON.parse(xhr.responseText);
-        if (xhr.status === 200 && res.success) {
-          resolve(res.data.url);
+    fetch(`https://api.imgbb.com/1/upload?key=${imgbbApiKey}`, {
+      method: "POST",
+      body: formData
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          onProgress(100); // assume done if fetch returns success
+          resolve(data.data.url);
         } else {
-          reject(new Error("Image upload failed."));
+          reject(new Error("Image upload failed"));
         }
-      } catch {
-        reject(new Error("ImgBB response parsing failed."));
-      }
-    };
-
-    xhr.onerror = () => reject(new Error("Network error during ImgBB upload"));
-    xhr.send(formData);
+      })
+      .catch((err) => {
+        reject(new Error("Network error during ImgBB upload"));
+      });
   });
 }
 
