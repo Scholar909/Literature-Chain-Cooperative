@@ -1,3 +1,4 @@
+/* ------------ IMPORTS ------------ */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import {
   getAuth,
@@ -10,12 +11,6 @@ import {
   addDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
-import {
-  getStorage,
-  ref,
-  uploadBytesResumable,
-  getDownloadURL
-} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-storage.js";
 
 /* ---------- CONFIG ---------- */
 const firebaseConfig = {
@@ -28,17 +23,13 @@ const firebaseConfig = {
 };
 
 /* ---------- INIT ---------- */
-const app = initializeApp(firebaseConfig);
+const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
-const store = getStorage(app);
-
-/* ---------- NEW:  ImgBB API KEY ---------- */
-const imgbbApiKey = "76b5c9b8204181e4bb53f33eb96b8efb";
+const db   = getFirestore(app);
 
 /* ---------- THEME ---------- */
 const modeBtn = document.getElementById("modeToggle"),
-  icon = modeBtn?.querySelector("i");
+      icon    = modeBtn?.querySelector("i");
 const setTheme = (light) => {
   document.body.classList.toggle("light-mode", light);
   if (icon) icon.className = light ? "bx bx-moon" : "bx bx-sun";
@@ -65,10 +56,7 @@ homeLink?.addEventListener("click", async (e) => {
     await signOut(auth);
     await new Promise((resolve) => {
       const unsub = onAuthStateChanged(auth, (u) => {
-        if (!u) {
-          unsub();
-          resolve();
-        }
+        if (!u) { unsub(); resolve(); }
       });
     });
   } catch (err) {
@@ -80,74 +68,16 @@ homeLink?.addEventListener("click", async (e) => {
 /* ---------- HELPERS ---------- */
 const $ = (sel) => document.querySelector(sel);
 
-/* ---------- COMPRESS IMAGE ---------- */
-function compressImage(file, maxWidth = 800) {
-  return new Promise((resolve) => {
-    const img = new Image();
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      img.src = e.target.result;
-    };
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      const scale = maxWidth / img.width;
-      canvas.width = maxWidth;
-      canvas.height = img.height * scale;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      canvas.toBlob(
-        (blob) => {
-          const newFile = new File([blob], file.name, { type: "image/jpeg" });
-          resolve(newFile);
-        },
-        "image/jpeg",
-        0.7
-      );
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-/* ---------- NEW:  UPLOAD TO ImgBB (with progress) ---------- */
-function uploadToImgBB(file, onProgress) {
-  return new Promise((resolve, reject) => {
-    const formData = new FormData();
-    formData.append("image", file);
-
-    fetch(`https://api.imgbb.com/1/upload?key=${imgbbApiKey}`, {
-      method: "POST",
-      body: formData
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          onProgress(100); // assume done if fetch returns success
-          resolve(data.data.url);
-        } else {
-          reject(new Error("Image upload failed"));
-        }
-      })
-      .catch((err) => {
-        reject(new Error("Network error during ImgBB upload"));
-      });
-  });
-}
-
-/* ---------- (optional)  OLD Firebase-Storage uploader kept for reuse ---------- */
-/*  function uploadToFirebaseStorage(...) { ... }  */
-
 /* ---------- FORM SUBMIT ---------- */
 $("#uploadForm")?.addEventListener("submit", async (e) => {
   e.preventDefault();
-  alert("Upload Triggered");
 
-  const submitBtn = $("#uploadForm button[type='submit']");
+  const submitBtn   = $("#uploadForm button[type='submit']");
   const progressBar = $("#uploadProgress");
 
   submitBtn.disabled = true;
-  progressBar.style.width = "0";
-  progressBar.style.opacity = "1";
   progressBar.style.display = "block";
+  progressBar.style.width   = "100%";
 
   const title = $("#bookTitle")?.value.trim();
   if (!title) {
@@ -157,32 +87,17 @@ $("#uploadForm")?.addEventListener("submit", async (e) => {
     return;
   }
 
-  const fileInput = $("#bookImg");
-  const file = fileInput?.files[0];
-  let imgURL = ""; // empty → front-end will just show the title as cover text
+  /* ---------- NEW:  IMAGE URL FIELD ---------- */
+  const imgURL = $("#bookImgLink")?.value.trim() || "";   // empty string → placeholder
 
   try {
-    if (file) {
-      console.log("Compressing…");
-      const compressedFile = await compressImage(file);
-      console.log("Uploading to ImgBB…");
-      imgURL = await uploadToImgBB(compressedFile, (p) => {
-        console.log("Progress:", p + "%");
-        progressBar.style.width = p + "%";
-      });
-      console.log("Uploaded:", imgURL);
-    } else {
-      /* nothing picked → leave imgURL = "" so cover shows title only */
-      progressBar.style.width = "100%";
-    }
-
     const docData = {
-      img: imgURL,
-      title,
+      img     : imgURL,
+      title   : title,
       category: $("#bookCategory")?.value.trim(),
-      link: $("#bookLink")?.value.trim(),
-      notes: $("#bookNotes")?.value.trim(),
-      ts: serverTimestamp()
+      link    : $("#bookLink")?.value.trim(),
+      notes   : $("#bookNotes")?.value.trim(),
+      ts      : serverTimestamp()
     };
 
     await addDoc(collection(db, "books"), docData);
@@ -193,11 +108,9 @@ $("#uploadForm")?.addEventListener("submit", async (e) => {
     alert("Upload failed: " + err.message);
   } finally {
     submitBtn.disabled = false;
-    progressBar.style.width = "100%";
     setTimeout(() => {
       progressBar.style.display = "none";
-      progressBar.style.width = "0";
-      progressBar.style.opacity = "0";
-    }, 800);
+      progressBar.style.width   = "0";
+    }, 600);
   }
 });
