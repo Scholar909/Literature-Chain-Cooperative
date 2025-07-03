@@ -110,22 +110,8 @@ $("#uploadForm")?.addEventListener("submit", async (e) => {
 
   try {
     if (file) {
-      // upload to Firebase Storage
-      const fileRef = ref(store, `books/${Date.now()}_${file.name}`);
-      await uploadBytes(fileRef, file);
-      const firebaseURL = await getDownloadURL(fileRef);
-
-      // optional imgbb mirror (only if you use your own key, otherwise skip)
-      if (IMGBB_API_KEY && IMGBB_API_KEY !== "76b5c9b8204181e4bb53f33eb96b8efb") {
-        try {
-          imgURL = await uploadToImgbb(file);
-        } catch (err) {
-          console.warn(err.message); // fallback
-          imgURL = firebaseURL;
-        }
-      } else {
-        imgURL = firebaseURL;
-      }
+      // Upload image file directly to ImgBB only
+      imgURL = await uploadToImgbb(file);
     }
 
     const docData = {
