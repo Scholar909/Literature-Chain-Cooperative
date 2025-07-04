@@ -102,8 +102,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const el = document.createElement("div");
     el.className = "book-card";
 
-    const imgHtml = d.img
-      ? `<img src="${d.img}" alt="${d.title}">`
+    const imgHtml = d.img && d.img.startsWith('http')
+      ? `<img src="${d.img}" alt="${d.title}" loading="lazy">`
       : `<div class="no-img-placeholder">${d.title}</div>`;
 
     el.innerHTML = `
@@ -151,20 +151,26 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  const searchForm = $("#searchForm");
-  if (searchForm) {
-    searchForm.addEventListener("submit", debounce((e) => {
-      e.preventDefault();
-      const t = $("#searchTitle").value.toLowerCase(),
-            c = $("#searchCategory").value;
-      $$(".book-card").forEach((card) => {
-        const txt = card.querySelector("h4").textContent.toLowerCase(),
-              cat = card.querySelector("span").textContent;
-        card.style.display =
-          (!t || txt.includes(t)) && (!c || c === cat) ? "flex" : "none";
-      });
-    }, 200));
-  }
+  /* ===== LIVE FILTER (no button, fires while typing) ===== */
+function filterBooks() {
+  const term = $("#searchTitle").value.trim().toLowerCase();
+  const cat  = $("#searchCategory").value;        // "" = All
+
+  $$(".book-card").forEach((card) => {
+    const txt = card.querySelector("h4").textContent.toLowerCase();
+    const c   = card.querySelector("span").textContent;
+    card.style.display =
+      (!term || txt.includes(term)) && (!cat || c === cat) ? "flex" : "none";
+  });
+}
+
+/* —as-you-type */
+$("#searchTitle")   ?.addEventListener("input",  debounce(filterBooks, 150));
+/* when category changes */
+$("#searchCategory")?.addEventListener("change", filterBooks);
+
+/* stop ENTER from reloading page */
+$("#searchForm")?.addEventListener("submit", (e) => e.preventDefault());
 
   /* ========= CART ========= */
   const CART_KEY  = "bookRunCart";
