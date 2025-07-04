@@ -101,7 +101,7 @@
         </div>
         <textarea id="reviewText" placeholder="Tell us what you think…"></textarea>
         <button type="submit" class="primary-btn">Post Review</button>
-        <a href="#" class="trustpilot-btn">Rate on SiteJabber</a>
+        <a href="https://short.vocalreferences.com/VDz36e" class="trustpilot-btn">Rate on VocalReference</a>
       </form>
       <div id="reviewCarousel" class="carousel"></div>
     </div>
@@ -120,6 +120,23 @@
         <li><a href="https://www.linkedin.com/in/eneh-ogbole-ab98b8355?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"><i class='bx bxl-linkedin'></i></a></li>
       </ul>
     </section>
+    <div style="
+  max-width: 300px;
+  margin: 30px auto;
+  padding: 16px;
+  border: 1px solid #2c2c2c;
+  border-radius: 12px;
+  background-color: #1b1b1b;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 14px;
+  color: #f1f1f1;
+">
+  <p style="margin: 0 0 10px;">⭐ Trusted by Readers</p>
+  <div id="starRatingWidget"></div>
+    </div>
+    
     <p>&copy; <span id="year"></span> LitChain. All rights reserved.</p>
   </footer>
 
@@ -168,6 +185,22 @@
     </form>
   </div>
 </div>
+
+  <script src="https://widgets.vocalreferences.com/js/star/star.min.js" id="starBadgeJs"></script>
+
+<script>
+  window.addEventListener('load', function () {
+    if (typeof StarRating !== 'undefined') {
+      StarRating.init({
+        hashurl: 'myyux*8F44fun3%7Bthfqwjkjwjshjx3htr4%7B%3D4xyfw2wfynsl5',
+        identity: 'dUAyrbw9cZR6slg-XfcucKADGsrJgvzr',
+        container: '#starRatingWidget'
+      });
+    } else {
+      console.error("VocalReferences StarRating widget failed to load.");
+    }
+  });
+</script>
 
   <script type="module" src="main.js"></script>
 </body>
