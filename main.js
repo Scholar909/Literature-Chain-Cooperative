@@ -341,8 +341,7 @@ $("#searchForm")?.addEventListener("submit", (e) => e.preventDefault());
       (snap) => {
         const mask = (e) => e.replace(/(.{2}).*(@.*)/, "$1***$2");
         carousel.innerHTML = "";
-        // ⬇️  ➜  add this
-        $("#totalReviews").textContent = snap.size + (snap.size === 1 ? " Review" : " Reviews");
+        
         snap.forEach((docSnap) => {
           const data = docSnap.data();
           const card = document.createElement("div");
