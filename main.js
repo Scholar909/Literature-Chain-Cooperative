@@ -1,5 +1,5 @@
 /* ------------ IMPORTS ------------ */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/fir9ebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import {
   getAuth,
   signInWithEmailAndPassword,
@@ -341,7 +341,6 @@ $("#searchForm")?.addEventListener("submit", (e) => e.preventDefault());
       (snap) => {
         const mask = (e) => e.replace(/(.{2}).*(@.*)/, "$1***$2");
         carousel.innerHTML = "";
-        
         snap.forEach((docSnap) => {
           const data = docSnap.data();
           const card = document.createElement("div");
