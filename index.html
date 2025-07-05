@@ -9,6 +9,7 @@
   <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
   <link rel="stylesheet" href="base.css">
   <link rel="stylesheet" href="rating.css">
+  <meta name="wot-verification" content="8684148dd7dbe44396a7"/>
 </head>
 <body>
   <header id="header">
@@ -121,6 +122,19 @@
         <li><a href="https://www.linkedin.com/in/eneh-ogbole-ab98b8355?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"><i class='bx bxl-linkedin'></i></a></li>
       </ul>
     </section>
+    <div style="
+  max-width: 300px;
+  margin: 30px auto;
+  padding: 16px;
+  border: 1px solid #2c2c2c;
+  border-radius: 12px;
+  background-color: transparent;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4)
+">
+  <p style="margin: 0 0 10px;">⭐ Trusted by Readers</p>
+  <div id="starRatingWidget"></div>
+    </div>
+    
     <p>&copy; <span id="year"></span> LitChain. All rights reserved.</p>
   </footer>
 
@@ -170,6 +184,23 @@
   </div>
 </div>
 
+  <script src="https://widgets.vocalreferences.com/js/star/star.min.js" id="starBadgeJs"></script>
+
+<script>
+  window.addEventListener('load', function () {
+    if (typeof StarRating !== 'undefined') {
+      StarRating.init({
+        hashurl: 'myyux*8F44fun3%7Bthfqwjkjwjshjx3htr4%7B%3D4xyfw2wfynsl5',
+        identity: 'dUAyrbw9cZR6slg-XfcucKADGsrJgvzr',
+        container: '#starRatingWidget'
+      });
+    } else {
+      console.error("VocalReferences StarRating widget failed to load.");
+    }
+  });
+</script>
+
   <script type="module" src="main.js"></script>
 </body>
-</html>
+  </html>
+      
