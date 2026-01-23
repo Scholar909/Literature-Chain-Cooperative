@@ -1,116 +1,186 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Math Graph Generator</title>
+    <meta charset="UTF-8">
+    <title>Mathematical Geometry Shapes</title>
     <style>
-        body { background-color: #f0f0f0; display: flex; flex-direction: column; align-items: center; font-family: sans-serif; }
-        #canvasContainer { background-color: white; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-top: 20px; }
-        canvas { background-color: white; }
-        .controls { margin-top: 20px; }
-        button { padding: 10px 20px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; }
+        /* Overall page background */
+        body { 
+            background-color: #f4f4f4; 
+            font-family: "Times New Roman", Times, serif; 
+            display: flex; 
+            flex-wrap: wrap; 
+            justify-content: center; 
+            gap: 20px; 
+            padding: 20px;
+        }
+        /* Individual container for each shape */
+        .shape-box {
+            background-color: white; /* Pure white background */
+            padding: 15px;
+            border: 1px solid #ddd;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        /* Canvas layout */
+        canvas { 
+            display: block; 
+            margin-bottom: 10px;
+        }
+        /* Button styling */
+        .btn {
+            padding: 8px 12px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
-<div id="canvasContainer">
-    <canvas id="graphCanvas" width="600" height="600"></canvas>
-</div>
-
-<div class="controls">
-    <button onclick="downloadImage()">Download Image</button>
-</div>
+<div id="container"></div>
 
 <script>
-    const canvas = document.getElementById('graphCanvas');
-    const ctx = canvas.getContext('2d');
-    const margin = 50;
-    const size = 500;
-    const scale = 50; // 1 unit = 50 pixels
+    const container = document.getElementById('container');
+    const a = 80; // Radius value
+    const canvasSize = 350;
+    const center = canvasSize / 2;
 
-    function draw() {
-        // Clear background to pure white
-        ctx.fillStyle = "white";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const shapes = [
+        { id: 1, type: "circle", shade: "diag-right", label: "" },
+        { id: 2, type: "circle", shade: "diag-right", label: "x - +ve, y - +ve" },
+        { id: 3, type: "circle", shade: "vertical", label: "x²+y²=a², y=√a²-x²" },
+        { id: 4, type: "circle", shade: "horizontal", label: "x²+y²=a², x=√a²-y²" },
+        { id: 5, type: "circle", shade: "none", label: "" },
+        { id: 6, type: "sector", shade: "none", label: "" }
+    ];
 
-        // Transform coordinate system (origin at bottom-left)
-        ctx.translate(margin, canvas.height - margin);
+    shapes.forEach(config => {
+        const box = document.createElement('div');
+        box.className = 'shape-box';
         
-        // Draw Axes
+        const canvas = document.createElement('canvas');
+        canvas.width = canvasSize;
+        canvas.height = canvasSize;
+        const ctx = canvas.getContext('2d');
+        
+        const btn = document.createElement('button');
+        btn.className = 'btn';
+        btn.innerText = `Download Shape ${config.id}`;
+        btn.onclick = () => download(canvas, `shape_${config.id}.png`);
+
+        box.appendChild(canvas);
+        box.appendChild(btn);
+        container.appendChild(box);
+
+        drawShape(ctx, config);
+    });
+
+    function drawShape(ctx, config) {
+        // 1. White Background
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, canvasSize, canvasSize);
+
+        // 2. X and Y Axes (Extended)
         ctx.strokeStyle = "black";
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.moveTo(0, 0); ctx.lineTo(size, 0); // X axis
-        ctx.moveTo(0, 0); ctx.lineTo(0, -size); // Y axis
+        ctx.moveTo(20, center); ctx.lineTo(canvasSize - 20, center); // X
+        ctx.moveTo(center, 20); ctx.lineTo(center, canvasSize - 20); // Y
         ctx.stroke();
 
-        // Draw Vertical Strips (Hatching) in the bounded area
-        ctx.strokeStyle = "#cccccc";
-        ctx.lineWidth = 1;
-        for (let x = 0.5; x < 8; x += 0.5) {
-            let xPx = x * scale;
-            let yStart = 0;
-            let yEnd = (x <= 4) ? x : (16 / x);
+        // Label Axis Tips
+        ctx.fillStyle = "black";
+        ctx.font = "italic 14px Times New Roman";
+        ctx.fillText("x", canvasSize - 15, center + 15);
+        ctx.fillText("y", center - 15, 15);
+
+        // 3. Quadrant Labels (I, II, III, IV)
+        ctx.font = "18px Times New Roman";
+        const offset = a + 30;
+        ctx.fillText("I", center + offset, center - offset);
+        ctx.fillText("II", center - offset - 10, center - offset);
+        ctx.fillText("III", center - offset - 20, center + offset + 10);
+        ctx.fillText("IV", center + offset, center + offset + 10);
+
+        // 4. Core Geometry
+        if (config.type === "circle") {
             ctx.beginPath();
-            ctx.moveTo(xPx, -yStart * scale);
-            ctx.lineTo(xPx, -yEnd * scale);
+            ctx.arc(center, center, a, 0, Math.PI * 2);
+            ctx.stroke();
+            if (config.shade !== "none") shadeQuadrant(ctx, config.shade);
+        } else {
+            // Sector for shape 6
+            ctx.beginPath();
+            ctx.moveTo(center, center);
+            ctx.lineTo(center + a, center);
+            ctx.arc(center, center, a, 0, -Math.PI/2, true);
+            ctx.closePath();
             ctx.stroke();
         }
 
-        // Draw y = x
-        ctx.strokeStyle = "blue";
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(4 * scale, -4 * scale);
-        ctx.stroke();
-        ctx.fillStyle = "blue";
-        ctx.fillText("y = x", 4 * scale + 5, -4 * scale);
+        // 5. Point Labels
+        ctx.font = "12px Times New Roman";
+        ctx.fillText("(0,0)", center - 30, center + 15);
+        ctx.fillText("(a,0)", center + a + 5, center + 15);
+        ctx.fillText("(-a,0)", center - a - 40, center + 15);
+        ctx.fillText("(0,a)", center + 5, center - a - 5);
+        ctx.fillText("(0,-a)", center + 5, center + a + 15);
 
-        // Draw xy = 16 (y = 16/x)
-        ctx.strokeStyle = "red";
-        ctx.beginPath();
-        for (let x = 2; x <= 10; x += 0.1) {
-            let y = 16 / x;
-            ctx.lineTo(x * scale, -y * scale);
+        // 6. Modified Position for Math labels (Now on the right side under Quadrant I)
+        if (config.label !== "") {
+            ctx.font = "14px Times New Roman";
+            const lines = config.label.split(", ");
+            lines.forEach((line, i) => {
+                // Positioned at center + offset (under the 'I')
+                ctx.fillText(line, center + offset - 20, (center - offset) + 25 + (i * 20));
+            });
         }
-        ctx.stroke();
-        ctx.fillStyle = "red";
-        ctx.fillText("xy = 16", 10 * scale, -(16/10) * scale);
-
-        // Draw x = 8
-        ctx.strokeStyle = "green";
-        ctx.beginPath();
-        ctx.moveTo(8 * scale, 0);
-        ctx.lineTo(8 * scale, -5 * scale);
-        ctx.stroke();
-        ctx.fillStyle = "green";
-        ctx.fillText("x = 8", 8 * scale, -5 * scale - 5);
-
-        // Draw Points and Labels
-        const points = [
-            {x: 0, y: 0, n: "A(0,0)"},
-            {x: 4, y: 4, n: "B(4,4)"},
-            {x: 8, y: 2, n: "C(8,2)"},
-            {x: 8, y: 0, n: "D(8,0)"},
-            {x: 4, y: 0, n: "E"}
-        ];
-
-        ctx.fillStyle = "black";
-        points.forEach(p => {
-            ctx.beginPath();
-            ctx.arc(p.x * scale, -p.y * scale, 4, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillText(p.n, p.x * scale + 5, -p.y * scale - 5);
-        });
     }
 
-    function downloadImage() {
+    function shadeQuadrant(ctx, style) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(center, center);
+        ctx.lineTo(center + a, center);
+        ctx.arc(center, center, a, 0, -Math.PI/2, true);
+        ctx.closePath();
+        ctx.clip();
+
+        ctx.strokeStyle = "#555";
+        if (style === "diag-right") {
+            for (let i = 0; i < a * 2; i += 8) {
+                ctx.beginPath();
+                ctx.moveTo(center + i - a, center);
+                ctx.lineTo(center + i, center - a);
+                ctx.stroke();
+            }
+        } else if (style === "vertical") {
+            for (let i = 0; i <= a; i += 8) {
+                ctx.beginPath();
+                ctx.moveTo(center + i, center);
+                ctx.lineTo(center + i, center - a);
+                ctx.stroke();
+            }
+        } else if (style === "horizontal") {
+            for (let i = 0; i <= a; i += 8) {
+                ctx.beginPath();
+                ctx.moveTo(center, center - i);
+                ctx.lineTo(center + a, center - i);
+                ctx.stroke();
+            }
+        }
+        ctx.restore();
+    }
+
+    function download(canvas, filename) {
         const link = document.createElement('a');
-        link.download = 'graph.png';
-        link.href = canvas.toDataURL();
+        link.download = filename;
+        link.href = canvas.toDataURL("image/png");
         link.click();
     }
-
-    draw();
 </script>
 
 </body>
