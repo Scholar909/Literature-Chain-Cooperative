@@ -1,212 +1,117 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta name="wot-verification" content="8ed6d6d5667d3690e974"/>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <meta name="description" content="LitChainCo is a trusted digital platform that curates and shares verified affiliate links to top-quality eBooks across all genres—education, business, self-help, and more. Discover and access the best eBook deals from leading stores, all in one place.">
-  <title>LitChain Co. - Literature Chain Cooperative</title>
-  <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="base.css">
-  <link rel="stylesheet" href="rating.css">
-  <link rel="icon" href="logo.png" type="image/png">
-  <script defer src="https://shown.io/metrics/db07mZgA8x" type="text/javascript"></script>
-  <!-- TrustBox script -->
-<script type="text/javascript" src="//widget.trustpilot.com/bootstrap/v5/tp.widget.bootstrap.min.js" async></script>
-<!-- End TrustBox script -->
-  <!-- Copy and paste this code into your website -->
-<script async src='https://static.mywot.com/website_owners_badges/websiteOwnersBadge.js'></script>
-  <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "url": "https://litchainco.name.ng",
-  "logo": "https://litchainco.name.ng/logo.png",
-  "name": "LitChain Co. - Literature Chain Cooperative"
-}
-  </script>
+    <title>Math Graph Generator</title>
+    <style>
+        body { background-color: #f0f0f0; display: flex; flex-direction: column; align-items: center; font-family: sans-serif; }
+        #canvasContainer { background-color: white; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-top: 20px; }
+        canvas { background-color: white; }
+        .controls { margin-top: 20px; }
+        button { padding: 10px 20px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; }
+    </style>
 </head>
 <body>
-  <header id="header">
-    <div class="logo"><img src="logo.png" alt="Book-Run"> LiTChain</div>
-    <button id="adminUploadBtn" class="icon-btn" title="Admin"><i class="bx bx-cloud-upload"></i></button>
-  </header>
 
-  <button id="modeToggle" title="Toggle theme"><i class="bx bx-sun"></i></button>
-
-  <nav id="nav">
-    <button id="navToggle" class="icon-btn" aria-expanded="false" aria-controls="navList" aria-label="Toggle menu">
-      <i class="bx bx-chevron-down"></i>
-    </button>
-  
-    <!-- Marquee container next to toggle -->
-    <div id="marqueeContainer" aria-hidden="true">
-      <div id="marqueeText">Welcome to Literature Chain Cooperative</div>
-    </div>
-  
-    <ul id="navList" class="hidden" role="menu" aria-label="Main navigation">
-      <li role="none"><a href="#intro" role="menuitem">Intro</a></li>
-      <li role="none"><a href="#books" role="menuitem">Books</a></li>
-      <li role="none"><a href="#request" role="menuitem">Help</a></li>
-      <li role="none"><a href="#contact" role="menuitem">Contact</a></li>
-      <li role="none"><a href="#reviews" role="menuitem">Reviews</a></li>
-    </ul>
-  </nav>
-
-  <section id="intro" class="card-section">
-    <h1>Welcome to LiTChain</h1>
-    <div class="inner-card">
-      <p>Browse our curated catalogue, grab a copy, and leave us a sparkling review ⭐. Find the book, course, novel or content you seek all in one place.</p>
-    </div>
-  </section>
-
-  <section id="books" class="card-section">
-    <h2>Find an eBook</h2>
-    <div id="search" class="inner-card">
-      <form id="searchForm">
-        <input type="text" id="searchTitle" placeholder="Search by title">
-        <select id="searchCategory"><option value="">All categories</option></select>
-      </form>
-    </div>
-    <br>
-    <br>
-    <br>
-    <h2>eBooks (<span id="bookCount">0</span>)</h2>
-    <div class="inner-card">
-      <div id="bookGrid" class="book-grid"></div>
-    </div>
-  </section>
-
-  <button id="cartBtn" class="floating-cart hidden" draggable="true">
-    <i class="bx bx-cart"></i><span id="cartCount">0</span>
-  </button>
-
-  <section id="request" class="card-section">
-    <h2>Need Help?</h2>
-    <div class="inner-card">
-      <select id="reqType" class="form-control">
-        <option value="complaint">Make Complaint</option>
-        <option value="request">Make Request</option>
-      </select>
-      <textarea id="reqMsg" class="form-control" placeholder="Type your message…"></textarea>
-      <button id="reqSend" class="primary-btn">Send</button>
-    </div>
-  </section>
-
-  <!-- ░░ CONTACT (MODIFIED) ░░ -->
-  <section id="contact" class="card-section">
-    <h2>Contact Us</h2>
-    <div class="inner-card">
-      <ul>
-        <li>Email: <a href="mailto:admin@litchainco.name.ng">admin@litchainco.name.ng</a></li>
-        <li>WhatsApp: <a href="https://wa.me/2348118663849" target="_blank">Chat Now</a></li>
-        <li>Tel: <a href="tel:+2349168873680">Call Now</a></li>
-      </ul>
-    </div>
-  </section>
-
-  <section id="reviews" class="card-section">
-    <h2>Leave a Review</h2>
-    <div class="inner-card">
-      <form id="reviewForm">
-        <div class="star-widget">
-          <input type="radio" name="rate" id="rate-5" value="5"><label for="rate-5"><i class="bx bxs-star"></i></label>
-          <input type="radio" name="rate" id="rate-4" value="4"><label for="rate-4"><i class="bx bxs-star"></i></label>
-          <input type="radio" name="rate" id="rate-3" value="3"><label for="rate-3"><i class="bx bxs-star"></i></label>
-          <input type="radio" name="rate" id="rate-2" value="2"><label for="rate-2"><i class="bx bxs-star"></i></label>
-          <input type="radio" name="rate" id="rate-1" value="1"><label for="rate-1"><i class="bx bxs-star"></i></label>
-        </div>
-        <textarea id="reviewText" placeholder="Tell us what you think…"></textarea>
-        <button type="submit" class="primary-btn">Post Review</button>
-        <a href="https://www.trustpilot.com/review/litchainco.name.ng" class="trustpilot-btn">Rate on Trust Pilot</a>
-      </form>
-      <div id="reviewCarousel" class="carousel"></div>
-    </div>
-  </section>
-
-  <footer id="footer">
-    <section id="socials">
-      <p><a href="terms.html">Terms of Service</a> • <a href="next.html">Privacy Policy</a></p>
-      <p class="follow">Follow Us</p>
-      <ul>
-        <li><a href="https://www.facebook.com/profile.php?id=61558115503193"><i class='bx bxl-facebook'></i></a></li>
-        <li><a href="https://twitter.com/intent/follow?screen_name=Yosh1122334455"><i class='bx bxl-twitter'></i></a></li>
-        <li><a href="https://www.tiktok.com/@opportunity_king"><i class='bx bxl-tiktok'></i></a></li>
-        <li><a href="https://www.instagram.com/eneh.ogbole/"><i class='bx bxl-instagram'></i></a></li>
-        <li><a href="https://youtube.com/@skylervalentine909?si=lvyjUorh5ooy_DTp"><i class='bx bxl-youtube'></i></a></li>
-        <li><a href="https://www.linkedin.com/in/eneh-ogbole-ab98b8355?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"><i class='bx bxl-linkedin'></i></a></li>
-      </ul>
-    </section>
-    <!-- TrustBox widget - Review Collector -->
-<div class="trustpilot-widget" data-locale="en-US" data-template-id="56278e9abfbbba0bdcd568bc" data-businessunit-id="6869573f29d0eb9d79415ab2" data-style-height="52px" data-style-width="100%">
-  <a href="https://www.trustpilot.com/review/litchainco.name.ng" target="_blank" rel="noopener">Trustpilot</a>
+<div id="canvasContainer">
+    <canvas id="graphCanvas" width="600" height="600"></canvas>
 </div>
-<!-- End TrustBox widget -->
-    <!-- Copy and paste this code into your website -->
-<a id='wot-badge2' class='wot-badge_dark' href='https://www.mywot.com/scorecard/litchainco.name.ng?wot_badge=2_black' target='_blank' >
-    <div class='wot-secured-container'>
-        <div class='wot-shield-background'></div>
-        <div class='wot-text-container'>
-            <p class='wot-secured-bold'>Verified Site</p>
-            <div class='wot-trusted-container'>
-                <div class='wot-trusted'>Trusted by</div>
-                <div class='wot-logo'></div>
-            </div>
-        </div>
-    </div>
-    <div class='wot-vertical'></div>
-    <p class='wot-report'>See Report</p>
-</a>
-    
-    <p>&copy; <span id="year"></span> LitChain. All rights reserved.</p>
-  </footer>
 
-  <div id="bookModal" class="modal hidden"><div class="modal-content"><button class="close">&times;</button><h3 id="bookModalTitle"></h3><p id="bookModalNotes"></p></div></div>
-  <div id="cartModal" class="modal hidden"><div class="modal-content"><button class="close">&times;</button><h3>Your Cart (<span id="cartModalCount">0</span>)</h3><table id="cartTable"></table></div></div>
-  <div id="loginModal" class="modal hidden">
-    <div class="modal-content">
-      <button class="close">&times;</button>
-      <h3>Admin Login</h3>
-      <form id="loginForm">
-        <input type="email" id="loginEmail" class="form-control" placeholder="Email" required>
-        <input type="password" id="loginPass" class="form-control" placeholder="Password" required>
-        <button type="submit" class="primary-btn">Sign in</button>
-      </form>
-    </div>
-  </div>
-  <!-- ===== EDIT REVIEW MODAL ===== -->
-<div id="editModal" class="modal hidden">
-  <div class="modal-content">
-    <button class="close">&times;</button>
-    <h3>Edit your review</h3>
-
-    <form id="editForm">
-      <div class="star-widget">
-        <input type="radio" name="erate" id="erate-5" value="5">
-        <label for="erate-5">★</label>
-      
-        <input type="radio" name="erate" id="erate-4" value="4">
-        <label for="erate-4">★</label>
-      
-        <input type="radio" name="erate" id="erate-3" value="3">
-        <label for="erate-3">★</label>
-      
-        <input type="radio" name="erate" id="erate-2" value="2">
-        <label for="erate-2">★</label>
-      
-        <input type="radio" name="erate" id="erate-1" value="1">
-        <label for="erate-1">★</label>
-      </div>
-
-      <textarea id="editText" rows="5" placeholder="Update your thoughts..."></textarea>
-
-      <div class="btn-row">
-        <button type="submit" class="primary-btn">Save</button>
-      </div>
-    </form>
-  </div>
+<div class="controls">
+    <button onclick="downloadImage()">Download Image</button>
 </div>
-  <script type="module" src="main.js"></script>
+
+<script>
+    const canvas = document.getElementById('graphCanvas');
+    const ctx = canvas.getContext('2d');
+    const margin = 50;
+    const size = 500;
+    const scale = 50; // 1 unit = 50 pixels
+
+    function draw() {
+        // Clear background to pure white
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Transform coordinate system (origin at bottom-left)
+        ctx.translate(margin, canvas.height - margin);
+        
+        // Draw Axes
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, 0); ctx.lineTo(size, 0); // X axis
+        ctx.moveTo(0, 0); ctx.lineTo(0, -size); // Y axis
+        ctx.stroke();
+
+        // Draw Vertical Strips (Hatching) in the bounded area
+        ctx.strokeStyle = "#cccccc";
+        ctx.lineWidth = 1;
+        for (let x = 0.5; x < 8; x += 0.5) {
+            let xPx = x * scale;
+            let yStart = 0;
+            let yEnd = (x <= 4) ? x : (16 / x);
+            ctx.beginPath();
+            ctx.moveTo(xPx, -yStart * scale);
+            ctx.lineTo(xPx, -yEnd * scale);
+            ctx.stroke();
+        }
+
+        // Draw y = x
+        ctx.strokeStyle = "blue";
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(4 * scale, -4 * scale);
+        ctx.stroke();
+        ctx.fillStyle = "blue";
+        ctx.fillText("y = x", 4 * scale + 5, -4 * scale);
+
+        // Draw xy = 16 (y = 16/x)
+        ctx.strokeStyle = "red";
+        ctx.beginPath();
+        for (let x = 2; x <= 10; x += 0.1) {
+            let y = 16 / x;
+            ctx.lineTo(x * scale, -y * scale);
+        }
+        ctx.stroke();
+        ctx.fillStyle = "red";
+        ctx.fillText("xy = 16", 10 * scale, -(16/10) * scale);
+
+        // Draw x = 8
+        ctx.strokeStyle = "green";
+        ctx.beginPath();
+        ctx.moveTo(8 * scale, 0);
+        ctx.lineTo(8 * scale, -5 * scale);
+        ctx.stroke();
+        ctx.fillStyle = "green";
+        ctx.fillText("x = 8", 8 * scale, -5 * scale - 5);
+
+        // Draw Points and Labels
+        const points = [
+            {x: 0, y: 0, n: "A(0,0)"},
+            {x: 4, y: 4, n: "B(4,4)"},
+            {x: 8, y: 2, n: "C(8,2)"},
+            {x: 8, y: 0, n: "D(8,0)"},
+            {x: 4, y: 0, n: "E"}
+        ];
+
+        ctx.fillStyle = "black";
+        points.forEach(p => {
+            ctx.beginPath();
+            ctx.arc(p.x * scale, -p.y * scale, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillText(p.n, p.x * scale + 5, -p.y * scale - 5);
+        });
+    }
+
+    function downloadImage() {
+        const link = document.createElement('a');
+        link.download = 'graph.png';
+        link.href = canvas.toDataURL();
+        link.click();
+    }
+
+    draw();
+</script>
+
 </body>
-  </html>
-      
+</html>
