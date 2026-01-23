@@ -2,149 +2,113 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Mathematical Curves 2026 - Central Labeling</title>
+    <title>Integration Graph 2026</title>
     <style>
-        /* Page Layout and Background */
-        body { background-color: #f4f4f4; font-family: "Times New Roman", Times, serif; display: flex; flex-direction: column; align-items: center; gap: 40px; padding: 40px; }
-        /* White Canvas Container */
-        .graph-box { background: white; padding: 25px; border: 1px solid #ddd; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        body { background-color: #f4f4f4; display: flex; flex-direction: column; align-items: center; padding: 20px; font-family: sans-serif; }
+        #canvasBox { background: white; padding: 10px; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         canvas { background-color: white; }
-        /* Styling for the Download Buttons */
-        .btn { margin-top: 20px; padding: 12px 24px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 16px; }
+        .controls { margin-top: 20px; }
+        button { padding: 12px 24px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div id="container"></div>
+<div id="canvasBox">
+    <canvas id="mathCanvas" width="600" height="600"></canvas>
+</div>
+
+<div class="controls">
+    <button onclick="downloadImage()">Download Graph</button>
+</div>
 
 <script>
-    const container = document.getElementById('container');
-    const width = 600, height = 500;
-    const margin = 70;
-    const ax = 180, bx = 420; 
-    const originY = height - margin;
-    const originX = margin;
-    
-    // Position of the f(x) label: Center of X-axis and 2.8/3 up the Y-axis height
-    const labelX = (ax + bx) / 2;
-    const labelY = originY - ((originY - 20) * (2.4 / 3));
+    const canvas = document.getElementById('mathCanvas');
+    const ctx = canvas.getContext('2d');
+    const size = 600;
+    const center = size / 2;
+    const scale = 200; // 1 unit = 200 pixels
 
-    // Vertical line anchor height for the curve logic
-    const dotLineTop = margin + (originY - margin) * 0.25; 
-
-    const configs = [
-        { id: 1, name: "Bimodal Shape", type: "bimodal" },
-        { id: 2, name: "Tick Shape (✓)", type: "tick" },
-        { id: 3, name: "Trimodal Shape", type: "trimodal" }
-    ];
-
-    configs.forEach(conf => {
-        const box = document.createElement('div');
-        box.className = 'graph-box';
-        const canvas = document.createElement('canvas');
-        canvas.width = width; canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        
-        const btn = document.createElement('button');
-        btn.className = 'btn';
-        btn.innerText = `Download ${conf.name}`;
-        btn.onclick = () => {
-            const link = document.createElement('a');
-            link.download = `${conf.type}_2026.png`;
-            link.href = canvas.toDataURL();
-            link.click();
-        };
-
-        box.appendChild(canvas);
-        box.appendChild(btn);
-        container.appendChild(box);
-        draw(ctx, conf.type);
-    });
-
-    function draw(ctx, type) {
-        // 1. Clear to Pure White
+    function draw() {
+        // Pure white background for 'Word' look
         ctx.fillStyle = "white";
-        ctx.fillRect(0, 0, width, height);
+        ctx.fillRect(0, 0, size, size);
 
-        // 2. Define Curve Math and Extension
-        let points = [];
-        const extend = 50; 
-        const steps = 200;
-        
-        for(let i = 0; i <= steps; i++) {
-            let x = (ax - extend) + ((bx + extend) - (ax - extend)) * (i / steps);
-            let t = (x - ax) / (bx - ax); 
-            let y;
-
-            if (type === "bimodal") {
-                y = dotLineTop + 60 * (1 - Math.cos(t * Math.PI * 2)) / 2;
-            } else if (type === "tick") {
-                y = (dotLineTop + 60) + 40 * Math.sin(t * Math.PI * 0.8) - (220 * Math.pow(t, 2));
-            } else {
-                y = dotLineTop + 60 * (1 - Math.cos(t * Math.PI * 4)) / 2;
-            }
-            points.push({x, y});
-        }
-
-        // 3. Draw L-Axis (Black Lines)
-        ctx.strokeStyle = "black";
+        // Draw Axes (Positive and Negative)
+        ctx.strokeStyle = "#333";
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(originX, 20); ctx.lineTo(originX, originY); 
-        ctx.lineTo(width - 20, originY); 
+        ctx.moveTo(0, center); ctx.lineTo(size, center); // X Axis
+        ctx.moveTo(center, 0); ctx.lineTo(center, size); // Y Axis
         ctx.stroke();
 
+        // Axis Labels at end tips
         ctx.fillStyle = "black";
-        ctx.font = "italic 22px Times New Roman";
-        ctx.fillText("y", originX - 30, 35);
-        ctx.fillText("x", width - 35, originY + 30);
+        ctx.font = "italic 16px serif";
+        ctx.fillText("x", size - 15, center + 20);
+        ctx.fillText("y", center - 20, 15);
 
-        // 4. Draw Vertical Dotted Lines (a and b)
-        ctx.setLineDash([5, 5]);
-        const ptA = points.find(p => Math.abs(p.x - ax) < 1);
-        const ptB = points.find(p => Math.abs(p.x - bx) < 1);
-        ctx.beginPath();
-        ctx.moveTo(ax, originY); ctx.lineTo(ax, ptA.y);
-        ctx.moveTo(bx, originY); ctx.lineTo(bx, ptB.y);
-        ctx.stroke();
-        ctx.setLineDash([]); 
+        // DRAW VERTICAL STRIPS in bounded area [0, 1]
+        const stripCount = 21; // Odd number to have a clear middle strip
+        const step = 1 / (stripCount - 1);
+        const middleIndex = Math.floor(stripCount / 2);
 
-        ctx.font = "20px Times New Roman";
-        ctx.fillText("a", ax - 5, originY + 30);
-        ctx.fillText("b", bx - 5, originY + 30);
+        for (let i = 0; i < stripCount; i++) {
+            let xVal = i * step;
+            let canvasX = center + (xVal * scale);
+            
+            // Curve values: Upper is y=x, Lower is y=x^2
+            let yTop = center - (xVal * scale);
+            let yBottom = center - (Math.pow(xVal, 2) * scale);
 
-        // 5. Area Strips (Diagonal Wide Upward)
-        ctx.save();
-        ctx.beginPath();
-        ctx.moveTo(ax, originY);
-        const bounded = points.filter(p => p.x >= ax && p.x <= bx);
-        bounded.forEach(p => ctx.lineTo(p.x, p.y));
-        ctx.lineTo(bx, originY);
-        ctx.clip();
-
-        ctx.strokeStyle = "#bbb";
-        ctx.lineWidth = 1;
-        for (let i = 0; i < width + height; i += 15) {
             ctx.beginPath();
-            ctx.moveTo(i, 0); ctx.lineTo(i - height, height);
+            ctx.strokeStyle = "#888";
+            // Middle strip thicker by 3% of standard lineWidth (approx 1.03 vs 1.0)
+            ctx.lineWidth = (i === middleIndex) ? 3.09 : 1.0; 
+            ctx.moveTo(canvasX, yBottom);
+            ctx.lineTo(canvasX, yTop);
             ctx.stroke();
         }
-        ctx.restore();
 
-        // 6. Draw Main Curve Line
-        ctx.strokeStyle = "black";
-        ctx.lineWidth = 3;
+        // DRAW y = x
+        ctx.strokeStyle = "blue";
+        ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(points[0].x, points[0].y);
-        points.forEach(p => ctx.lineTo(p.x, p.y));
+        ctx.moveTo(center - scale, center + scale); // (-1, -1)
+        ctx.lineTo(center + scale, center - scale); // (1, 1)
         ctx.stroke();
+        ctx.fillText("y = x", center + scale + 5, center - scale);
 
-        // 7. f(x) Label - Fixed at center of X and 2.8/3 of graph height
-        ctx.font = "italic 24px Times New Roman";
-        ctx.textAlign = "center";
-        ctx.fillText("f(x)", labelX, labelY);
-        ctx.textAlign = "start"; // Reset for other text
+        // DRAW y = x^2
+        ctx.strokeStyle = "red";
+        ctx.beginPath();
+        for (let x = -1.2; x <= 1.2; x += 0.01) {
+            let cx = center + (x * scale);
+            let cy = center - (Math.pow(x, 2) * scale);
+            if (x === -1.2) ctx.moveTo(cx, cy);
+            else ctx.lineTo(cx, cy);
+        }
+        ctx.stroke();
+        ctx.fillText("y = x²", center + (1.2 * scale) - 40, center - (Math.pow(1.2, 2) * scale));
+
+        // Mark Points (0,0) and (1,1)
+        const points = [{x: 0, y: 0, n: "(0,0)"}, {x: 1, y: 1, n: "(1,1)"}];
+        ctx.fillStyle = "black";
+        points.forEach(p => {
+            ctx.beginPath();
+            ctx.arc(center + p.x * scale, center - p.y * scale, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillText(p.n, center + p.x * scale + 8, center - p.y * scale - 8);
+        });
     }
+
+    function downloadImage() {
+        const link = document.createElement('a');
+        link.download = 'graph_y_x_squared_2026.png';
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+    }
+
+    draw();
 </script>
 
 </body>
