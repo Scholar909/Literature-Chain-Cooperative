@@ -1,83 +1,153 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <title>Polar Coordinate Diagram - Hatching</title>
     <style>
-        body { display: flex; flex-direction: column; align-items: center; background: #fff; font-family: "Times New Roman", serif; }
-        canvas { border: 1px solid #000; margin-top: 20px; }
-        button { margin-top: 15px; padding: 10px 25px; cursor: pointer; font-weight: bold; }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #ffffff;
+            font-family: serif;
+        }
+        canvas {
+            background-color: #fff;
+            border: 1px solid #ddd;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background: #000;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
-    <canvas id="c" width="600" height="500"></canvas>
+
+    <canvas id="mathCanvas" width="700" height="600"></canvas>
     <button onclick="download()">Download Image</button>
 
     <script>
-        const canvas = document.getElementById('c');
+        const canvas = document.getElementById('mathCanvas');
         const ctx = canvas.getContext('2d');
-        const ox = 300, oy = 420, s = 85;
 
         function draw() {
-            ctx.fillStyle = "white"; ctx.fillRect(0,0,600,500);
-            ctx.strokeStyle = "black"; ctx.lineWidth = 2; ctx.fillStyle = "black";
+            const ox = 350; // Origin O
+            const oy = 500; // Horizontal base line
+            const scale = 100;
 
-            // 1. Shaded Region (Manual Hatching to match your drawing)
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // --- 1. Clipping Path for Shading (Strips) ---
             ctx.save();
             ctx.beginPath();
-            for(let t=0; t<=Math.PI; t+=0.01) {
-                let r=4*Math.sin(t)*s; ctx.lineTo(ox+r*Math.cos(t-Math.PI/2), oy-r*Math.sin(t-Math.PI/2));
+            // Outer Circle Path
+            for (let a = 0; a <= Math.PI + 0.05; a += 0.02) {
+                let r = 4 * Math.sin(a) * scale;
+                ctx.lineTo(ox + r * Math.cos(a), oy - r * Math.sin(a));
             }
-            for(let t=Math.PI; t>=0; t-=0.01) {
-                let r=2*Math.sin(t)*s; ctx.lineTo(ox+r*Math.cos(t-Math.PI/2), oy-r*Math.sin(t-Math.PI/2));
+            // Inner Circle Path (reverse to create the "hole")
+            for (let a = Math.PI; a >= -0.05; a -= 0.02) {
+                let r = 2 * Math.sin(a) * scale;
+                ctx.lineTo(ox + r * Math.cos(a), oy - r * Math.sin(a));
             }
-            ctx.clip();
-            ctx.beginPath();
-            for(let i=-600; i<1200; i+=15) { ctx.moveTo(i, 0); ctx.lineTo(i-400, 600); }
-            ctx.lineWidth = 1; ctx.stroke();
+            ctx.closePath();
+            ctx.clip(); // Restrict drawing to the area between circles
+
+            // Draw diagonal strips within the clip
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = 1;
+            for (let i = -500; i < 700; i += 12) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i + 400, 600);
+                ctx.stroke();
+            }
             ctx.restore();
 
-            // 2. Main Circles & Axes
-            ctx.lineWidth = 2;
-            [4, 2].forEach(a => {
+            // --- 2. Outlines and Axes ---
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = 2.5;
+
+            // Horizontal line
+            ctx.beginPath();
+            ctx.moveTo(50, oy);
+            ctx.lineTo(650, oy);
+            ctx.stroke();
+
+            // Vertical axis with arrowhead
+            ctx.beginPath();
+            ctx.moveTo(ox, oy);
+            ctx.lineTo(ox, 50);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(ox - 8, 68);
+            ctx.lineTo(ox, 50);
+            ctx.lineTo(ox + 8, 68);
+            ctx.stroke();
+
+            // Function to draw circle outlines
+            const drawCircle = (mult) => {
                 ctx.beginPath();
-                for(let t=0; t<=Math.PI; t+=0.01) {
-                    let r=a*Math.sin(t)*s; ctx.lineTo(ox+r*Math.cos(t-Math.PI/2), oy-r*Math.sin(t-Math.PI/2));
+                for (let a = 0; a <= Math.PI + 0.05; a += 0.02) {
+                    let r = mult * Math.sin(a) * scale;
+                    ctx.lineTo(ox + r * Math.cos(a), oy - r * Math.sin(a));
                 }
                 ctx.stroke();
-            });
+            };
+            drawCircle(2);
+            drawCircle(4);
 
-            // Straight Lines (Vertical Axis and Horizontal Base)
-            ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(ox, 50); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(50, oy); ctx.lineTo(550, oy); ctx.stroke();
+            // Radial line
+            const angle = Math.PI / 3;
+            let rQ = 4 * Math.sin(angle) * scale;
+            let rP = 2 * Math.sin(angle) * scale;
+            let qx = ox + rQ * Math.cos(angle);
+            let qy = oy - rQ * Math.sin(angle);
+            let px = ox + rP * Math.cos(angle);
+            let py = oy - rP * Math.sin(angle);
 
-            // Line OPQ
-            let ang = Math.PI/3, rP = 2*Math.sin(ang)*s, rQ = 4*Math.sin(ang)*s;
-            let px = ox+rP*Math.cos(ang-Math.PI/2), py = oy-rP*Math.sin(ang-Math.PI/2);
-            let qx = ox+rQ*Math.cos(ang-Math.PI/2), qy = oy-rQ*Math.sin(ang-Math.PI/2);
-            ctx.beginPath(); ctx.moveTo(ox, oy); ctx.lineTo(qx, qy); ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(ox, oy);
+            ctx.lineTo(qx + 35, qy - 30);
+            ctx.stroke();
 
-            // Dots
-            [ {x:px, y:py}, {x:qx, y:qy} ].forEach(p => {
-                ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, 7); ctx.fill();
-            });
+            // Points
+            ctx.fillStyle = "black";
+            ctx.beginPath(); ctx.arc(px, py, 5, 0, 7); ctx.fill();
+            ctx.beginPath(); ctx.arc(qx, qy, 5, 0, 7); ctx.fill();
 
-            // 3. Labelling (Exact placement)
-            ctx.font = "italic 22px Times New Roman";
-            ctx.fillText("O", ox - 10, oy + 30);
+            // --- 3. Math Labels (Serif Cursive Style) ---
+            ctx.font = "italic 26px 'Times New Roman', serif";
+            ctx.fillText("O", ox - 10, oy + 35);
+            ctx.fillText("θ = 0", 490, oy - 15);
+            ctx.fillText("θ = π", 110, oy - 15);
             ctx.fillText("P", px - 25, py);
-            ctx.fillText("Q", qx - 25, qy - 5);
-            ctx.fillText("r = 4 sin θ", qx + 10, qy - 5);
-            ctx.fillText("r = 2 sin θ", px + 15, py + 15);
-            ctx.fillText("θ = 0", ox + 180, oy - 10);
-            ctx.fillText("θ = π", ox - 260, oy - 10);
+            ctx.fillText("Q", qx - 20, qy - 15);
+            
+            ctx.font = "italic 24px 'Times New Roman', serif";
+            ctx.fillText("r = 2 sin θ", px + 15, py + 25);
+            ctx.fillText("r = 4 sin θ", qx + 15, qy);
         }
 
         function download() {
             const link = document.createElement('a');
-            link.download = 'exact_diagram.png';
-            link.href = canvas.toDataURL();
+            link.download = 'polar_hatching_diagram.png';
+            link.href = canvas.toDataURL("image/png");
             link.click();
         }
+
         draw();
     </script>
 </body>
 </html>
+
