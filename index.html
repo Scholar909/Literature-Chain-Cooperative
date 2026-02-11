@@ -3,155 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hand-Drawn Math Diagram Replicated</title>
+    <title>Polar Curve Replication - Final Correction</title>
     <style>
         body {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
-            background-color: #f0f0f0;
-            font-family: 'Times New Roman', Times, serif;
+            background-color: #f4f4f4;
+            font-family: 'Times New Roman', serif;
         }
-        #canvasContainer {
+        #container {
             background: white;
             padding: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
         }
         canvas {
-            border: 1px solid #ddd;
+            border: 1px solid #ccc;
+            background: #fff;
         }
         button {
-            margin-top: 20px;
-            padding: 10px 20px;
+            margin-top: 15px;
+            padding: 10px 25px;
             font-size: 16px;
             cursor: pointer;
-            background-color: #007bff;
+            background-color: #333;
             color: white;
             border: none;
-            border-radius: 5px;
-            transition: background 0.3s;
+            border-radius: 4px;
         }
         button:hover {
-            background-color: #0056b3;
+            background-color: #555;
         }
     </style>
 </head>
 <body>
 
-<div id="canvasContainer">
-    <canvas id="mathCanvas" width="400" height="400"></canvas>
+<div id="container">
+    <canvas id="polarCanvas" width="600" height="500"></canvas>
+    <br>
+    <button id="downloadBtn">Download Image</button>
 </div>
 
-<button id="downloadBtn">Download Image</button>
-
 <script>
-    const canvas = document.getElementById('mathCanvas');
+    const canvas = document.getElementById('polarCanvas');
     const ctx = canvas.getContext('2d');
+    const centerX = 200; 
+    const centerY = 250;
+    const scale = 110;
 
-    function drawDiagram() {
+    function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.strokeStyle = 'black';
+        ctx.fillStyle = 'black';
         ctx.lineWidth = 2;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
 
-        // Set Math Font
-        ctx.font = 'italic 24px "Times New Roman"';
-        ctx.fillStyle = 'black';
-
         // 1. Axes
         ctx.beginPath();
-        ctx.moveTo(80, 50);
-        ctx.lineTo(80, 350);
+        ctx.moveTo(50, centerY);
+        ctx.lineTo(550, centerY); 
         ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(70, 70); ctx.lineTo(80, 50); ctx.lineTo(90, 70);
-        ctx.stroke();
-        ctx.fillText('Y', 45, 75);
 
         ctx.beginPath();
-        ctx.moveTo(80, 350);
-        ctx.lineTo(350, 350);
+        ctx.moveTo(centerX, 50);
+        ctx.lineTo(centerX, 450); 
         ctx.stroke();
+
+        // 2. Circle
         ctx.beginPath();
-        ctx.moveTo(330, 340); ctx.lineTo(350, 350); ctx.lineTo(330, 360);
+        ctx.arc(centerX, centerY, scale, 0, Math.PI * 2);
         ctx.stroke();
-        ctx.fillText('X', 355, 365);
 
-        // 2. Parabola/Curve (y = sqrt(2(2-x)))
+        // 3. Cardioid (Pointing RIGHT): r = a(1 + cos θ)
         ctx.beginPath();
-        ctx.moveTo(80, 80); 
-        ctx.quadraticCurveTo(300, 80, 300, 350); 
+        for (let th = 0; th <= Math.PI * 2; th += 0.01) {
+            let r = scale * (1 + Math.cos(th));
+            let x = centerX + r * Math.cos(th);
+            let y = centerY - r * Math.sin(th);
+            if (th === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
         ctx.stroke();
 
-        // 3. Line (y = 2 - x)
-        ctx.beginPath();
-        ctx.moveTo(80, 80); 
-        ctx.lineTo(300, 350); 
-        ctx.stroke();
-
-        // 4. Labels A and B
-        ctx.fillText('B', 95, 75);
-        ctx.fillText('A', 305, 340);
-
-        // 5. Equations
-        ctx.font = 'italic 18px "Times New Roman"';
-        ctx.fillText('y = √2(2-x)', 200, 40);
-        ctx.fillText('y² = 2(2-x)', 210, 80);
-        
-        // MOVED CLOSER: Translation adjusted to pull label tighter to the line
-        ctx.save();
-        ctx.translate(140, 180); 
-        ctx.rotate(Math.atan2(270, 220));
-        ctx.fillText('y = 2 - x', 10, 30); 
-        ctx.restore();
-
-        // 6. Shaded Region with Diagonal Strips
-        const startX = 185;
-        const endX = 215;
-        
-        const yLineStart = 80 + (startX - 80) * (270 / 220); 
-        const yLineEnd = 80 + (endX - 80) * (270 / 220);     
-        
-        // REDUCED HEIGHT: Adjusted Y values to sit exactly on the curve y² path
-        const yCurveStart = 107; 
-        const yCurveEnd = 125;   
-
+        // 4. Dotted Region (Heart bulge on the RIGHT)
         ctx.save();
         ctx.beginPath();
-        ctx.moveTo(startX, yLineStart); 
-        ctx.lineTo(endX, yLineEnd);   
-        ctx.lineTo(endX, yCurveEnd);   
-        ctx.quadraticCurveTo(200, 110, startX, yCurveStart); 
-        ctx.closePath();
-        ctx.clip(); 
-        
-        ctx.lineWidth = 1.5; // Slightly thicker for a more hand-drawn look
-        for (let i = -100; i < 600; i += 8) {
-            ctx.beginPath();
-            ctx.moveTo(0, i);
-            ctx.lineTo(i, 0);
-            ctx.stroke();
+        for (let th = -Math.PI/2; th <= Math.PI/2; th += 0.01) {
+            let r = scale * (1 + Math.cos(th));
+            ctx.lineTo(centerX + r * Math.cos(th), centerY - r * Math.sin(th));
+        }
+        for (let th = Math.PI/2; th >= -Math.PI/2; th -= 0.01) {
+            ctx.lineTo(centerX + scale * Math.cos(th), centerY - scale * Math.sin(th));
+        }
+        ctx.clip();
+
+        for (let i = 0; i < 1500; i++) {
+            let dotX = Math.random() * 300 + centerX;
+            let dotY = Math.random() * 400 + (centerY - 200);
+            ctx.fillRect(dotX, dotY, 1.5, 1.5);
         }
         ctx.restore();
+
+        // 5. Labels & Equations
+        ctx.font = 'italic 22px "Times New Roman"';
+        ctx.fillText('r = a(1 + cos θ)', 380, 80);
+        ctx.fillText('θ = 0', 480, 275);
+        ctx.fillText('θ = π/2', centerX + 10, 45);
         
-        // Redraw vertical strip boundary lines
-        ctx.lineWidth = 2;
+        // ADJUSTED: Changed x coordinate from 50 to 10 to move it left
+        ctx.fillText('θ = π', 10, 275); 
+
+        ctx.font = '22px "Times New Roman"';
+        ctx.fillText('A', centerX - 25, centerY - scale - 10);
+        ctx.fillText('B', centerX + scale - 25, centerY + 25); 
+        ctx.fillText('C', centerX - 20, centerY + scale + 30);
+        ctx.fillText('D', centerX + (scale * 2) - 30, centerY + 25); 
+
+        // 6. Radial indicator line
         ctx.beginPath();
-        ctx.moveTo(startX, yLineStart); ctx.lineTo(startX, yCurveStart);
-        ctx.moveTo(endX, yLineEnd); ctx.lineTo(endX, yCurveEnd);
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(centerX + 150, centerY - 140);
         ctx.stroke();
     }
 
-    drawDiagram();
+    draw();
 
-    document.getElementById('downloadBtn').addEventListener('click', function() {
+    document.getElementById('downloadBtn').addEventListener('click', () => {
         const link = document.createElement('a');
-        link.download = 'exact-math-diagram.png';
+        link.download = 'polar_right_cardioid.png';
         link.href = canvas.toDataURL();
         link.click();
     });
