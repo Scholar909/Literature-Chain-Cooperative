@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Polar Curve Replication - Final Correction</title>
+    <title>Symmetric Math Diagram - Precise Shading</title>
     <style>
         body {
             display: flex;
@@ -12,131 +12,126 @@
             justify-content: center;
             min-height: 100vh;
             margin: 0;
-            background-color: #f4f4f4;
+            background-color: #f0f0f0;
             font-family: 'Times New Roman', serif;
         }
-        #container {
+        #canvasContainer {
             background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        canvas {
-            border: 1px solid #ccc;
-            background: #fff;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 4px;
         }
         button {
-            margin-top: 15px;
+            margin-top: 20px;
             padding: 10px 25px;
-            font-size: 16px;
+            font-size: 14px;
             cursor: pointer;
             background-color: #333;
             color: white;
             border: none;
-            border-radius: 4px;
+            transition: 0.2s;
         }
-        button:hover {
-            background-color: #555;
-        }
+        button:hover { background-color: #000; }
     </style>
 </head>
 <body>
 
-<div id="container">
-    <canvas id="polarCanvas" width="600" height="500"></canvas>
-    <br>
-    <button id="downloadBtn">Download Image</button>
+<div id="canvasContainer">
+    <canvas id="mathCanvas" width="600" height="600"></canvas>
 </div>
 
+<button id="downloadBtn">Download Diagram</button>
+
 <script>
-    const canvas = document.getElementById('polarCanvas');
+    const canvas = document.getElementById('mathCanvas');
     const ctx = canvas.getContext('2d');
-    const centerX = 200; 
-    const centerY = 250;
-    const scale = 110;
 
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.strokeStyle = 'black';
-        ctx.fillStyle = 'black';
-        ctx.lineWidth = 2;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
+        
+        const centerX = 300;
+        const centerY = 350; 
+        const a = 140; 
 
-        // 1. Axes
-        ctx.beginPath();
-        ctx.moveTo(50, centerY);
-        ctx.lineTo(550, centerY); 
-        ctx.stroke();
+        const toX = (r, th) => centerX + r * Math.cos(th);
+        const toY = (r, th) => centerY - r * Math.sin(th);
 
-        ctx.beginPath();
-        ctx.moveTo(centerX, 50);
-        ctx.lineTo(centerX, 450); 
-        ctx.stroke();
-
-        // 2. Circle
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, scale, 0, Math.PI * 2);
-        ctx.stroke();
-
-        // 3. Cardioid (Pointing RIGHT): r = a(1 + cos θ)
-        ctx.beginPath();
-        for (let th = 0; th <= Math.PI * 2; th += 0.01) {
-            let r = scale * (1 + Math.cos(th));
-            let x = centerX + r * Math.cos(th);
-            let y = centerY - r * Math.sin(th);
-            if (th === 0) ctx.moveTo(x, y);
-            else ctx.lineTo(x, y);
-        }
-        ctx.stroke();
-
-        // 4. Dotted Region (Heart bulge on the RIGHT)
+        // 1. Precise Shaded Region (The Crescent)
         ctx.save();
+        
+        // Define the shape by tracing the outer circle arc and returning along the cardioid arc
         ctx.beginPath();
-        for (let th = -Math.PI/2; th <= Math.PI/2; th += 0.01) {
-            let r = scale * (1 + Math.cos(th));
-            ctx.lineTo(centerX + r * Math.cos(th), centerY - r * Math.sin(th));
+        // Trace Circle from theta = 0 to PI/2
+        for (let th = 0; th <= Math.PI / 2; th += 0.01) {
+            let r = a * Math.sin(th);
+            ctx.lineTo(toX(r, th), toY(r, th));
         }
-        for (let th = Math.PI/2; th >= -Math.PI/2; th -= 0.01) {
-            ctx.lineTo(centerX + scale * Math.cos(th), centerY - scale * Math.sin(th));
+        // Trace Cardioid backwards from theta = PI/2 down to 0
+        for (let th = Math.PI / 2; th >= 0; th -= 0.01) {
+            let r = a * (1 - Math.cos(th));
+            ctx.lineTo(toX(r, th), toY(r, th));
         }
+        ctx.closePath();
         ctx.clip();
 
-        for (let i = 0; i < 1500; i++) {
-            let dotX = Math.random() * 300 + centerX;
-            let dotY = Math.random() * 400 + (centerY - 200);
-            ctx.fillRect(dotX, dotY, 1.5, 1.5);
+        // Draw the diagonal strips inside this clipped region
+        ctx.strokeStyle = '#555';
+        ctx.lineWidth = 1;
+        for (let i = -600; i < 600; i += 8) {
+            ctx.beginPath();
+            ctx.moveTo(centerX + i, 0);
+            ctx.lineTo(centerX + i - 600, 600);
+            ctx.stroke();
         }
         ctx.restore();
 
-        // 5. Labels & Equations
-        ctx.font = 'italic 22px "Times New Roman"';
-        ctx.fillText('r = a(1 + cos θ)', 380, 80);
-        ctx.fillText('θ = 0', 480, 275);
-        ctx.fillText('θ = π/2', centerX + 10, 45);
-        
-        // ADJUSTED: Changed x coordinate from 50 to 10 to move it left
-        ctx.fillText('θ = π', 10, 275); 
+        // 2. Outlines
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
 
-        ctx.font = '22px "Times New Roman"';
-        ctx.fillText('A', centerX - 25, centerY - scale - 10);
-        ctx.fillText('B', centerX + scale - 25, centerY + 25); 
-        ctx.fillText('C', centerX - 20, centerY + scale + 30);
-        ctx.fillText('D', centerX + (scale * 2) - 30, centerY + 25); 
-
-        // 6. Radial indicator line
+        // Cardioid Outline (Full)
         ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
-        ctx.lineTo(centerX + 150, centerY - 140);
+        for (let th = 0; th <= Math.PI * 2; th += 0.01) {
+            let r = a * (1 - Math.cos(th));
+            ctx.lineTo(toX(r, th), toY(r, th));
+        }
         ctx.stroke();
+
+        // Circle Outline (Full)
+        ctx.beginPath();
+        for (let th = 0; th <= Math.PI; th += 0.01) {
+            let r = a * Math.sin(th);
+            ctx.lineTo(toX(r, th), toY(r, th));
+        }
+        ctx.stroke();
+
+        // 3. Axes
+        ctx.lineWidth = 1.5;
+        // X-axis
+        ctx.beginPath();
+        ctx.moveTo(50, centerY); ctx.lineTo(550, centerY);
+        ctx.stroke();
+        // Y-axis
+        ctx.beginPath();
+        ctx.moveTo(centerX, 550); ctx.lineTo(centerX, 50);
+        ctx.stroke();
+
+        // 4. Labels
+        ctx.fillStyle = 'black';
+        ctx.font = 'italic 18px "Times New Roman"';
+        ctx.fillText('r = a(1 - cos θ)', 60, 150);
+        ctx.fillText('r = a sin θ', 410, 260);
+        ctx.fillText('x', 560, centerY + 5);
+        ctx.fillText('y', centerX - 20, 45);
+        ctx.fillText('θ = 0', centerX + 10, centerY + 25);
+        ctx.fillText('θ = π/2', centerX + 10, 70);
     }
 
     draw();
 
     document.getElementById('downloadBtn').addEventListener('click', () => {
         const link = document.createElement('a');
-        link.download = 'polar_right_cardioid.png';
+        link.download = 'crescent_shaded_diagram.png';
         link.href = canvas.toDataURL();
         link.click();
     });
