@@ -3,99 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exact Diagram Replication</title>
+    <title>Geometry Diagram Replication</title>
     <style>
         body {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            background-color: #f0f0f0;
+            min-height: 100vh;
+            background-color: #f4f4f4;
             margin: 0;
+            font-family: sans-serif;
         }
         canvas {
             background-color: white;
-            border: 1px solid #ccc;
+            border: 1px solid #000;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
         button {
             margin-top: 20px;
-            padding: 10px 20px;
+            padding: 12px 24px;
             font-size: 16px;
+            font-weight: bold;
             cursor: pointer;
-            background-color: #333;
+            background-color: #222;
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #444;
         }
     </style>
 </head>
 <body>
 
-    <canvas id="diagramCanvas" width="600" height="500"></canvas>
-    <button onclick="downloadImage()">Download as Image</button>
+    <canvas id="geometryCanvas" width="700" height="700"></canvas>
+    <button onclick="downloadDiagram()">Download Diagram</button>
 
     <script>
-        const canvas = document.getElementById('diagramCanvas');
+        const canvas = document.getElementById('geometryCanvas');
         const ctx = canvas.getContext('2d');
 
-        function drawDiagram() {
+        function draw() {
+            // Setup styles
             ctx.strokeStyle = 'black';
-            ctx.lineWidth = 2;
-            ctx.font = 'italic 22px "Times New Roman", serif'; 
             ctx.fillStyle = 'black';
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.font = 'italic 24px "Times New Roman", serif';
 
-            // --- V-axis ---
+            // --- Draw Coordinate Axes ---
+            // Y-axis (Vertical)
             ctx.beginPath();
-            ctx.moveTo(100, 420);
-            ctx.lineTo(100, 40);
+            ctx.moveTo(100, 650);
+            ctx.lineTo(100, 50);
             ctx.stroke();
-            // Arrowhead
-            ctx.lineTo(95, 55); ctx.moveTo(100, 40); ctx.lineTo(105, 55);
-            ctx.stroke();
-            ctx.fillText('V-axis', 20, 35);
-
-            // --- u-axis ---
+            // Arrowhead for Y-axis
             ctx.beginPath();
-            ctx.moveTo(80, 210);
-            ctx.lineTo(550, 170); // Slight upward angle like the sketch
+            ctx.moveTo(92, 65); ctx.lineTo(100, 45); ctx.lineTo(108, 65);
             ctx.stroke();
-            ctx.fillText('u-axis', 500, 205);
 
-            // --- Rectangle Boundaries ---
-            const xLeft = 180, xRight = 420;
-            const yTop = 60, yBottom = 400;
-
+            // X-axis (Horizontal - slightly angled as in the image)
             ctx.beginPath();
-            ctx.moveTo(xLeft, yTop); ctx.lineTo(xRight, yTop); // Top
-            ctx.moveTo(xRight, yTop); ctx.lineTo(xRight, yBottom); // Right
-            ctx.moveTo(xRight, yBottom); ctx.lineTo(xLeft, yBottom); // Bottom
-            ctx.moveTo(xLeft, yBottom); ctx.lineTo(xLeft, yTop); // Left
+            ctx.moveTo(70, 350);
+            ctx.lineTo(550, 320);
             ctx.stroke();
-
-            // --- The Thicker Middle Line ---
+            // Arrowhead for X-axis
             ctx.beginPath();
-            ctx.lineWidth = 4; // Making it noticeably thicker
-            ctx.moveTo(xLeft, 110);
-            ctx.lineTo(xRight, 100);
+            ctx.moveTo(535, 312); ctx.lineTo(555, 320); ctx.lineTo(535, 328);
             ctx.stroke();
-            ctx.lineWidth = 2; // Reset
 
-            // --- Labels ---
-            ctx.fillText('R(1, 1)', xLeft - 60, yTop + 5);
-            ctx.fillText('S(4, 1)', xRight + 10, yTop + 5);
-            ctx.fillText('Q(1, -2)', xLeft - 15, yBottom + 35);
-            ctx.fillText('P(4, -2)', xRight - 20, yBottom + 35);
+            // --- Define Points (Calculated relative positions based on equations) ---
+            const A = { x: 100, y: 350 };
+            const B = { x: 300, y: 600 };
+            const C = { x: 480, y: 330 };
+            const D = { x: 280, y: 110 };
+
+            // --- Draw the Main Quadrilateral Lines ---
+            // Line AD & continuation: 3x-2y = 0
+            ctx.beginPath();
+            ctx.moveTo(A.x, A.y);
+            ctx.lineTo(D.x + 50, D.y - 50);
+            ctx.stroke();
+            ctx.fillText('3x - 2y = 0', D.x + 60, D.y - 40);
+
+            // Line BC & continuation: 3x-2y = 3
+            ctx.beginPath();
+            ctx.moveTo(B.x - 20, B.y + 20);
+            ctx.lineTo(C.x + 60, C.y - 80);
+            ctx.stroke();
+            ctx.fillText('3x - 2y = 3', C.x + 50, C.y - 85);
+
+            // Line AB: x+y = 0
+            ctx.beginPath();
+            ctx.moveTo(A.x - 10, A.y - 10);
+            ctx.lineTo(B.x + 30, B.y + 30);
+            ctx.stroke();
+            ctx.fillText('x + y = 0', B.x + 40, B.y + 25);
+
+            // Line DC: x+y = 2
+            ctx.beginPath();
+            ctx.moveTo(D.x - 40, D.y - 40);
+            ctx.lineTo(C.x + 40, C.y + 40);
+            ctx.stroke();
+            ctx.fillText('x + y = 2', C.x + 20, C.y + 60);
+
+            // --- Labels A, B, C, D ---
+            ctx.font = 'bold italic 28px "Times New Roman", serif';
+            ctx.fillText('A', A.x - 40, A.y - 10);
+            ctx.fillText('B', B.x - 10, B.y + 45);
+            ctx.fillText('C', C.x - 10, C.y - 20);
+            ctx.fillText('D', D.x - 10, D.y - 20);
         }
 
-        function downloadImage() {
+        function downloadDiagram() {
             const link = document.createElement('a');
-            link.download = 'exact_diagram.png';
+            link.download = 'geometry_diagram.png';
             link.href = canvas.toDataURL();
             link.click();
         }
 
-        drawDiagram();
+        draw();
     </script>
 </body>
 </html>
