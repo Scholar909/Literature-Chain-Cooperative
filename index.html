@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Polar Geometry Diagram</title>
+    <title>Calculus Diagram Replication</title>
     <style>
         body {
             display: flex;
@@ -18,141 +18,134 @@
         canvas {
             background-color: white;
             border: 1px solid #ccc;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         button {
             margin-top: 20px;
-            padding: 10px 25px;
+            padding: 12px 25px;
             font-size: 16px;
             cursor: pointer;
-            background-color: #333;
+            background-color: #222;
             color: white;
             border: none;
             border-radius: 4px;
         }
-        button:hover { background-color: #555; }
+        button:hover { background-color: #444; }
     </style>
 </head>
 <body>
 
-    <canvas id="diagramCanvas" width="600" height="600"></canvas>
-    <button onclick="downloadImage()">Download Diagram</button>
+    <canvas id="diagramCanvas" width="700" height="550"></canvas>
+    <button onclick="downloadImage()">Download as Image</button>
 
     <script>
         const canvas = document.getElementById('diagramCanvas');
         const ctx = canvas.getContext('2d');
 
-        function drawDiagram() {
+        function draw() {
             ctx.strokeStyle = 'black';
             ctx.lineWidth = 2;
-            ctx.font = 'italic 26px "Times New Roman", serif';
+            ctx.font = 'italic 24px "Times New Roman", serif';
             ctx.fillStyle = 'black';
 
-            const centerX = 250;
-            const centerY = 350;
-            const radius = 130;
-
-            // --- Draw Circle ---
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-            ctx.stroke();
+            const originX = 150;
+            const originY = 450;
 
             // --- Draw Axes ---
-            // x-axis
             ctx.beginPath();
-            ctx.moveTo(centerX - 160, centerY);
-            ctx.lineTo(centerX + 230, centerY);
+            ctx.moveTo(originX, originY + 50);
+            ctx.lineTo(originX, 50);
             ctx.stroke();
-            // x-arrow
-            ctx.lineTo(centerX + 215, centerY - 6);
-            ctx.moveTo(centerX + 230, centerY);
-            ctx.lineTo(centerX + 215, centerY + 6);
+            ctx.lineTo(originX - 6, 65); ctx.moveTo(originX, 50); ctx.lineTo(originX + 6, 65);
             ctx.stroke();
-            ctx.fillText('x axis', centerX + 200, centerY + 40);
+            ctx.fillText('y - axis', originX - 90, 70);
 
-            // y-axis
             ctx.beginPath();
-            ctx.moveTo(centerX, centerY + 160);
-            ctx.lineTo(centerX, centerY - 250);
+            ctx.moveTo(originX - 50, originY);
+            ctx.lineTo(600, originY);
             ctx.stroke();
-            // y-arrow
-            ctx.lineTo(centerX - 6, centerY - 235);
-            ctx.moveTo(centerX, centerY - 250);
-            ctx.lineTo(centerX + 6, centerY - 235);
-            ctx.stroke();
-            ctx.fillText('y axis', centerX - 90, centerY - 270);
+            ctx.fillText('x - axis', 520, originY + 40);
+            ctx.fillText('0', originX - 30, originY + 30);
 
-            // --- Diagonal Strip Shading (1st Quadrant) ---
+            // --- Draw Curved Region ABCD ---
+            const x1 = 230, x2 = 550;
+            const midX = (x1 + x2) / 2;
+
+            // Define curves for calculation
+            const getBottomY = (x) => {
+                const t = (x - x1) / (x2 - x1);
+                return (1 - t) * (1 - t) * 400 + 2 * (1 - t) * t * 360 + t * t * 380;
+            };
+            const getTopY = (x) => {
+                const t = (x - x1) / (x2 - x1);
+                return (1 - t) * (1 - t) * 80 + 2 * (1 - t) * t * 150 + t * t * 100;
+            };
+
+            ctx.beginPath();
+            ctx.moveTo(x1, 400);
+            ctx.quadraticCurveTo(midX, 360, x2, 380);
+            ctx.lineTo(x2, 100);
+            ctx.quadraticCurveTo(midX, 150, x1, 80);
+            ctx.lineTo(x1, 400);
+            ctx.stroke();
+
+            // --- Vertical Strip and P/Q Element ---
+            const stripX1 = midX - 15;
+            const stripX2 = midX + 15;
+            
+            // Draw the two internal vertical lines touching top and bottom
+            ctx.beginPath();
+            ctx.moveTo(stripX1, getTopY(stripX1)); ctx.lineTo(stripX1, getBottomY(stripX1));
+            ctx.moveTo(stripX2, getTopY(stripX2)); ctx.lineTo(stripX2, getBottomY(stripX2));
+            ctx.stroke();
+
+            // The central shaded "delta" box
+            const boxY = 240;
+            const boxH = 30;
+            
             ctx.save();
             ctx.beginPath();
-            ctx.moveTo(centerX, centerY);
-            ctx.lineTo(centerX + radius, centerY);
-            ctx.arc(centerX, centerY, radius, 0, -Math.PI / 2, true);
-            ctx.closePath();
-            ctx.clip();
-
+            ctx.rect(stripX1, boxY, stripX2 - stripX1, boxH);
+            ctx.stroke();
+            ctx.clip(); 
+            
             ctx.beginPath();
-            for (let i = -radius; i < radius * 2; i += 12) {
-                ctx.moveTo(centerX + i, centerY);
-                ctx.lineTo(centerX + i + radius, centerY - radius);
+            for(let i = -50; i < 100; i += 8) {
+                ctx.moveTo(stripX1 + i, boxY);
+                ctx.lineTo(stripX1 + i + 40, boxY + boxH);
             }
             ctx.stroke();
             ctx.restore();
 
-            // --- Theta Arc & Radial Line r ---
-            const thetaRadius = radius + 60; // Distance further out
-            const angleStart = -Math.PI * 0.45; // Roughly 80 degrees
-            const angleEnd = -Math.PI * 0.15;   // Roughly 25 degrees
-            const midAngle = (angleStart + angleEnd) / 2;
+            // --- Labels ---
+            ctx.fillText('A', x1 + 5, 430);
+            ctx.fillText('B', x2 - 20, 410);
+            ctx.fillText('C', x2 + 5, 90);
+            ctx.fillText('D', x1 - 25, 100);
 
-            // Draw the Theta arc (Concentric to the circle)
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, thetaRadius, angleStart, angleEnd);
-            ctx.stroke();
-
-            // Arrowheads for Theta arc
-            const headlen = 10;
-            // Left arrowhead
-            ctx.save();
-            ctx.translate(centerX + thetaRadius * Math.cos(angleStart), centerY + thetaRadius * Math.sin(angleStart));
-            ctx.rotate(angleStart - Math.PI / 2);
-            ctx.beginPath(); ctx.moveTo(-5, headlen); ctx.lineTo(0, 0); ctx.lineTo(5, headlen); ctx.stroke();
-            ctx.restore();
-            // Right arrowhead
-            ctx.save();
-            ctx.translate(centerX + thetaRadius * Math.cos(angleEnd), centerY + thetaRadius * Math.sin(angleEnd));
-            ctx.rotate(angleEnd + Math.PI / 2);
-            ctx.beginPath(); ctx.moveTo(-5, headlen); ctx.lineTo(0, 0); ctx.lineTo(5, headlen); ctx.stroke();
-            ctx.restore();
-
-            ctx.fillText('θ', centerX + (thetaRadius + 20) * Math.cos(midAngle), centerY + (thetaRadius + 20) * Math.sin(midAngle));
-
-            // Radial line 'r' pointing through the center of the arc
-            ctx.beginPath();
-            ctx.moveTo(centerX + (radius - 20) * Math.cos(midAngle), centerY + (radius - 20) * Math.sin(midAngle));
-            ctx.lineTo(centerX + (thetaRadius + 40) * Math.cos(midAngle), centerY + (thetaRadius + 40) * Math.sin(midAngle));
-            ctx.stroke();
-            // Arrowhead for r
-            const rx = centerX + (thetaRadius + 40) * Math.cos(midAngle);
-            const ry = centerY + (thetaRadius + 40) * Math.sin(midAngle);
-            ctx.beginPath();
-            ctx.moveTo(rx - 10, ry + 2);
-            ctx.lineTo(rx, ry);
-            ctx.stroke();
-            ctx.fillText('r', rx + 15, ry - 5);
+            ctx.fillText('P', stripX1 - 25, boxY + 20);
+            ctx.fillText('Q', stripX2 + 10, boxY + 20);
             
-            // Origin marker '1'
-            ctx.fillText('1', centerX - 20, centerY + 30);
+            ctx.fillText('δx', stripX1 - 55, boxY + 55);
+            ctx.fillText('δy', stripX2 + 70, boxY + 55);
+
+            ctx.beginPath();
+            ctx.moveTo(stripX1 - 10, boxY + 45); ctx.lineTo(stripX1 - 35, boxY + 45); 
+            ctx.moveTo(stripX2 + 10, boxY + 25); ctx.lineTo(stripX2 + 65, boxY + 45); 
+            ctx.stroke();
+
+            ctx.fillText('x = x₁', x1 - 70, 380);
+            ctx.fillText('x = x₂', x2 + 5, 370);
         }
 
         function downloadImage() {
             const link = document.createElement('a');
-            link.download = 'polar_coordinates.png';
+            link.download = 'calculus_final.png';
             link.href = canvas.toDataURL();
             link.click();
         }
 
-        drawDiagram();
+        draw();
     </script>
 </body>
 </html>
