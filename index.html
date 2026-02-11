@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exact Diagram Replication</title>
+    <title>Polar Geometry Diagram</title>
     <style>
         body {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            background-color: #f8f8f8;
+            min-height: 100vh;
+            background-color: #f0f0f0;
             margin: 0;
             font-family: 'Times New Roman', serif;
         }
@@ -25,18 +25,18 @@
             padding: 10px 25px;
             font-size: 16px;
             cursor: pointer;
-            background-color: #222;
+            background-color: #333;
             color: white;
             border: none;
             border-radius: 4px;
         }
-        button:hover { background-color: #444; }
+        button:hover { background-color: #555; }
     </style>
 </head>
 <body>
 
-    <canvas id="diagramCanvas" width="600" height="500"></canvas>
-    <button onclick="downloadImage()">Download as Image</button>
+    <canvas id="diagramCanvas" width="600" height="600"></canvas>
+    <button onclick="downloadImage()">Download Diagram</button>
 
     <script>
         const canvas = document.getElementById('diagramCanvas');
@@ -45,67 +45,109 @@
         function drawDiagram() {
             ctx.strokeStyle = 'black';
             ctx.lineWidth = 2;
-            ctx.font = 'italic 24px "Times New Roman", serif';
+            ctx.font = 'italic 26px "Times New Roman", serif';
             ctx.fillStyle = 'black';
 
-            // --- V-axis (Vertical Left) ---
+            const centerX = 250;
+            const centerY = 350;
+            const radius = 130;
+
+            // --- Draw Circle ---
             ctx.beginPath();
-            ctx.moveTo(120, 480);
-            ctx.lineTo(120, 50);
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
             ctx.stroke();
-            // Arrowhead
-            ctx.lineTo(114, 65); ctx.moveTo(120, 50); ctx.lineTo(126, 65);
-            ctx.stroke();
-            ctx.fillText('v-axis', 140, 60);
 
-            // --- u-axis (Horizontal Bottom) ---
+            // --- Draw Axes ---
+            // x-axis
             ctx.beginPath();
-            ctx.moveTo(100, 410);
-            ctx.lineTo(500, 375); // Slight upward angle from image
+            ctx.moveTo(centerX - 160, centerY);
+            ctx.lineTo(centerX + 230, centerY);
             ctx.stroke();
-            // Arrowhead
-            ctx.lineTo(485, 370); ctx.moveTo(500, 375); ctx.lineTo(488, 383);
+            // x-arrow
+            ctx.lineTo(centerX + 215, centerY - 6);
+            ctx.moveTo(centerX + 230, centerY);
+            ctx.lineTo(centerX + 215, centerY + 6);
             ctx.stroke();
-            ctx.fillText('u-axis', 430, 415);
+            ctx.fillText('x axis', centerX + 200, centerY + 40);
 
-            // --- Rectangle boundaries ---
-            const x1 = 120, x2 = 360;
-            const yBottomLeft = 410, yBottomRight = 388;
-            const yTopLeft = 100, yTopRight = 70;
-
-            // Top boundary
+            // y-axis
             ctx.beginPath();
-            ctx.moveTo(x1, yTopLeft);
-            ctx.lineTo(480, 50); // Extending past P like in the sketch
+            ctx.moveTo(centerX, centerY + 160);
+            ctx.lineTo(centerX, centerY - 250);
             ctx.stroke();
-            ctx.fillText('v = 3', 250, 85);
+            // y-arrow
+            ctx.lineTo(centerX - 6, centerY - 235);
+            ctx.moveTo(centerX, centerY - 250);
+            ctx.lineTo(centerX + 6, centerY - 235);
+            ctx.stroke();
+            ctx.fillText('y axis', centerX - 90, centerY - 270);
 
-            // Right vertical line (P to S)
+            // --- Diagonal Strip Shading (1st Quadrant) ---
+            ctx.save();
             ctx.beginPath();
-            ctx.moveTo(x2, 450);
-            ctx.lineTo(x2, 40);
-            ctx.stroke();
-            ctx.fillText('u = 2', x2 + 15, 220);
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(centerX + radius, centerY);
+            ctx.arc(centerX, centerY, radius, 0, -Math.PI / 2, true);
+            ctx.closePath();
+            ctx.clip();
 
-            // --- Thicker Middle Line ---
             ctx.beginPath();
-            ctx.lineWidth = 4;
-            ctx.moveTo(x1, 350);
-            ctx.lineTo(x2, 315);
+            for (let i = -radius; i < radius * 2; i += 12) {
+                ctx.moveTo(centerX + i, centerY);
+                ctx.lineTo(centerX + i + radius, centerY - radius);
+            }
             ctx.stroke();
-            ctx.lineWidth = 2; // Reset
+            ctx.restore();
 
-            // --- Corner Labels ---
-            ctx.fillText('Q', x1 - 35, yTopLeft);
-            ctx.fillText('P', x2, yTopRight - 10);
-            ctx.fillText('R', x1 + 10, yBottomLeft + 35);
-            ctx.fillText('S', x2 + 10, yBottomRight + 35);
-            ctx.fillText('v = 0', x1 - 70, yBottomLeft - 5);
+            // --- Theta Arc & Radial Line r ---
+            const thetaRadius = radius + 60; // Distance further out
+            const angleStart = -Math.PI * 0.45; // Roughly 80 degrees
+            const angleEnd = -Math.PI * 0.15;   // Roughly 25 degrees
+            const midAngle = (angleStart + angleEnd) / 2;
+
+            // Draw the Theta arc (Concentric to the circle)
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, thetaRadius, angleStart, angleEnd);
+            ctx.stroke();
+
+            // Arrowheads for Theta arc
+            const headlen = 10;
+            // Left arrowhead
+            ctx.save();
+            ctx.translate(centerX + thetaRadius * Math.cos(angleStart), centerY + thetaRadius * Math.sin(angleStart));
+            ctx.rotate(angleStart - Math.PI / 2);
+            ctx.beginPath(); ctx.moveTo(-5, headlen); ctx.lineTo(0, 0); ctx.lineTo(5, headlen); ctx.stroke();
+            ctx.restore();
+            // Right arrowhead
+            ctx.save();
+            ctx.translate(centerX + thetaRadius * Math.cos(angleEnd), centerY + thetaRadius * Math.sin(angleEnd));
+            ctx.rotate(angleEnd + Math.PI / 2);
+            ctx.beginPath(); ctx.moveTo(-5, headlen); ctx.lineTo(0, 0); ctx.lineTo(5, headlen); ctx.stroke();
+            ctx.restore();
+
+            ctx.fillText('θ', centerX + (thetaRadius + 20) * Math.cos(midAngle), centerY + (thetaRadius + 20) * Math.sin(midAngle));
+
+            // Radial line 'r' pointing through the center of the arc
+            ctx.beginPath();
+            ctx.moveTo(centerX + (radius - 20) * Math.cos(midAngle), centerY + (radius - 20) * Math.sin(midAngle));
+            ctx.lineTo(centerX + (thetaRadius + 40) * Math.cos(midAngle), centerY + (thetaRadius + 40) * Math.sin(midAngle));
+            ctx.stroke();
+            // Arrowhead for r
+            const rx = centerX + (thetaRadius + 40) * Math.cos(midAngle);
+            const ry = centerY + (thetaRadius + 40) * Math.sin(midAngle);
+            ctx.beginPath();
+            ctx.moveTo(rx - 10, ry + 2);
+            ctx.lineTo(rx, ry);
+            ctx.stroke();
+            ctx.fillText('r', rx + 15, ry - 5);
+            
+            // Origin marker '1'
+            ctx.fillText('1', centerX - 20, centerY + 30);
         }
 
         function downloadImage() {
             const link = document.createElement('a');
-            link.download = 'diagram_replicated.png';
+            link.download = 'polar_coordinates.png';
             link.href = canvas.toDataURL();
             link.click();
         }
