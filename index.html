@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Symmetric Math Diagram - Precise Shading</title>
+    <title>Polar Area Diagram - Slim Proportions</title>
     <style>
         body {
             display: flex;
@@ -15,123 +15,153 @@
             background-color: #f0f0f0;
             font-family: 'Times New Roman', serif;
         }
-        #canvasContainer {
+        #container {
             background: white;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
             border-radius: 4px;
         }
+        canvas { background: white; }
         button {
-            margin-top: 20px;
-            padding: 10px 25px;
-            font-size: 14px;
+            margin-top: 25px;
+            padding: 12px 25px;
+            font-size: 15px;
             cursor: pointer;
             background-color: #333;
             color: white;
             border: none;
-            transition: 0.2s;
+            transition: 0.3s;
         }
         button:hover { background-color: #000; }
     </style>
 </head>
 <body>
 
-<div id="canvasContainer">
-    <canvas id="mathCanvas" width="600" height="600"></canvas>
+<div id="container">
+    <canvas id="polarCanvas" width="550" height="600"></canvas>
 </div>
 
 <button id="downloadBtn">Download Diagram</button>
 
 <script>
-    const canvas = document.getElementById('mathCanvas');
+    const canvas = document.getElementById('polarCanvas');
     const ctx = canvas.getContext('2d');
 
-    function draw() {
+    function drawDiagram() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        const centerX = 300;
-        const centerY = 350; 
-        const a = 140; 
-
-        const toX = (r, th) => centerX + r * Math.cos(th);
-        const toY = (r, th) => centerY - r * Math.sin(th);
-
-        // 1. Precise Shaded Region (The Crescent)
-        ctx.save();
+        const originX = 100;
+        const originY = 500;
         
-        // Define the shape by tracing the outer circle arc and returning along the cardioid arc
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 1.8;
+        ctx.lineCap = "round";
+        ctx.fillStyle = "black";
+        ctx.font = "italic 20px 'Times New Roman'";
+
+        // Narrower angles to create the "slim" look of the sketch
+        const L1 = -Math.PI / 15;    // Line 1 (θ1)
+        const L2 = -Math.PI / 5;     // Line 2 (θ)
+        const L3 = -Math.PI / 4.2;   // Line 3 (θ + dθ) - Slimmer dθ slice
+        const L4 = -Math.PI / 2.8;   // Line 4 (θ2)
+
+        const rSmall = 250; // Distance for Arc AB
+        const rLarge = 420; // Distance for Arc CD
+
+        // 1. Axes
+        // X-axis (Line 0)
         ctx.beginPath();
-        // Trace Circle from theta = 0 to PI/2
-        for (let th = 0; th <= Math.PI / 2; th += 0.01) {
-            let r = a * Math.sin(th);
-            ctx.lineTo(toX(r, th), toY(r, th));
-        }
-        // Trace Cardioid backwards from theta = PI/2 down to 0
-        for (let th = Math.PI / 2; th >= 0; th -= 0.01) {
-            let r = a * (1 - Math.cos(th));
-            ctx.lineTo(toX(r, th), toY(r, th));
-        }
+        ctx.moveTo(originX, originY);
+        ctx.lineTo(480, originY);
+        ctx.stroke();
+        ctx.fillText("x-axis", 490, originY + 5);
+
+        // Y-axis
+        ctx.beginPath();
+        ctx.moveTo(originX, originY);
+        ctx.lineTo(originX, 50);
+        ctx.stroke();
+        ctx.fillText("axis", originX - 20, 40);
+
+        // 2. Radial Lines (Line 1 to 4)
+        const drawLine = (angle, len) => {
+            ctx.beginPath();
+            ctx.moveTo(originX, originY);
+            ctx.lineTo(originX + len * Math.cos(angle), originY + len * Math.sin(angle));
+            ctx.stroke();
+        };
+
+        drawLine(L1, 480); 
+        drawLine(L2, 480); 
+        drawLine(L3, 480); 
+        drawLine(L4, 480); 
+
+        // 3. Boundary Arcs (From Line 1 to Line 4)
+        ctx.beginPath();
+        ctx.arc(originX, originY, rSmall, L1, L4, true);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(originX, originY, rLarge, L1, L4, true);
+        ctx.stroke();
+
+        // 4. Shaded Region PQ (Between Line 2 & 3 AND Arc AB & CD)
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(originX, originY);
+        ctx.lineTo(originX + 500 * Math.cos(L2), originY + 500 * Math.sin(L2));
+        ctx.arc(originX, originY, 500, L2, L3, true);
+        ctx.lineTo(originX, originY);
+        ctx.clip();
+
+        ctx.beginPath();
+        ctx.arc(originX, originY, rLarge, L3, L2, false);
+        ctx.arc(originX, originY, rSmall, L2, L3, true);
         ctx.closePath();
         ctx.clip();
 
-        // Draw the diagonal strips inside this clipped region
-        ctx.strokeStyle = '#555';
+        // Diagonal Striping
         ctx.lineWidth = 1;
-        for (let i = -600; i < 600; i += 8) {
+        for (let i = -300; i < 800; i += 6) {
             ctx.beginPath();
-            ctx.moveTo(centerX + i, 0);
-            ctx.lineTo(centerX + i - 600, 600);
+            ctx.moveTo(originX + i, originY - 600);
+            ctx.lineTo(originX + i - 300, originY + 100);
             ctx.stroke();
         }
         ctx.restore();
 
-        // 2. Outlines
-        ctx.strokeStyle = '#000';
-        ctx.lineWidth = 2;
+        // 5. Labels and Angle Arcs (Adjusted for slim spacing)
+        ctx.fillText("O", originX - 25, originY + 25);
+        ctx.fillText("A", originX + rSmall * Math.cos(L1) + 5, originY + rSmall * Math.sin(L1) + 20);
+        ctx.fillText("B", originX + rSmall * Math.cos(L4) - 25, originY + rSmall * Math.sin(L4) + 10);
+        ctx.fillText("C", originX + rLarge * Math.cos(L1) + 5, originY + rLarge * Math.sin(L1) + 20);
+        ctx.fillText("D", originX + rLarge * Math.cos(L4) - 10, originY + rLarge * Math.sin(L4) - 10);
+        ctx.fillText("P", originX + rSmall * Math.cos(L2) + 12, originY + rSmall * Math.sin(L2) + 10);
+        ctx.fillText("Q", originX + rLarge * Math.cos(L3) + 12, originY + rLarge * Math.sin(L3) + 10);
 
-        // Cardioid Outline (Full)
-        ctx.beginPath();
-        for (let th = 0; th <= Math.PI * 2; th += 0.01) {
-            let r = a * (1 - Math.cos(th));
-            ctx.lineTo(toX(r, th), toY(r, th));
-        }
-        ctx.stroke();
+        // θ1 (Line 0 to 1)
+        ctx.beginPath(); ctx.arc(originX, originY, 80, 0, L1, true); ctx.stroke();
+        ctx.fillText("θ₁", originX + 90, originY - 15);
 
-        // Circle Outline (Full)
-        ctx.beginPath();
-        for (let th = 0; th <= Math.PI; th += 0.01) {
-            let r = a * Math.sin(th);
-            ctx.lineTo(toX(r, th), toY(r, th));
-        }
-        ctx.stroke();
+        // θ (Line 0 to 2)
+        ctx.beginPath(); ctx.arc(originX, originY, 130, 0, L2, true); ctx.stroke();
+        ctx.fillText("θ", originX + 135, originY - 45);
 
-        // 3. Axes
-        ctx.lineWidth = 1.5;
-        // X-axis
-        ctx.beginPath();
-        ctx.moveTo(50, centerY); ctx.lineTo(550, centerY);
-        ctx.stroke();
-        // Y-axis
-        ctx.beginPath();
-        ctx.moveTo(centerX, 550); ctx.lineTo(centerX, 50);
-        ctx.stroke();
+        // dθ (Line 2 to 3)
+        ctx.beginPath(); ctx.arc(originX, originY, 180, L2, L3, true); ctx.stroke();
+        ctx.fillText("dθ", originX + 150, originY - 110);
 
-        // 4. Labels
-        ctx.fillStyle = 'black';
-        ctx.font = 'italic 18px "Times New Roman"';
-        ctx.fillText('r = a(1 - cos θ)', 60, 150);
-        ctx.fillText('r = a sin θ', 410, 260);
-        ctx.fillText('x', 560, centerY + 5);
-        ctx.fillText('y', centerX - 20, 45);
-        ctx.fillText('θ = 0', centerX + 10, centerY + 25);
-        ctx.fillText('θ = π/2', centerX + 10, 70);
+        // θ2 (Line 0 to 4) - CORRECTED: Now from Line 0 (angle 0) to Line 4 (angle L4)
+        ctx.beginPath(); 
+        ctx.arc(originX, originY, 60, 0, L4, true); 
+        ctx.stroke();
+        ctx.fillText("θ₂", originX + 20, originY - 65);
     }
 
-    draw();
+    drawDiagram();
 
     document.getElementById('downloadBtn').addEventListener('click', () => {
         const link = document.createElement('a');
-        link.download = 'crescent_shaded_diagram.png';
+        link.download = 'polar_area_slim.png';
         link.href = canvas.toDataURL();
         link.click();
     });
