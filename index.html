@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Polar Coordinate Diagram - Hatching</title>
+    <title>Vector Projection Diagram</title>
     <style>
         body {
             display: flex;
@@ -12,7 +12,7 @@
             min-height: 100vh;
             margin: 0;
             background-color: #ffffff;
-            font-family: serif;
+            font-family: 'Times New Roman', serif;
         }
         canvas {
             background-color: #fff;
@@ -20,134 +20,110 @@
         }
         button {
             margin-top: 20px;
-            padding: 10px 20px;
+            padding: 12px 24px;
             font-size: 16px;
             cursor: pointer;
             background: #000;
             color: #fff;
             border: none;
-            border-radius: 4px;
+            border-radius: 5px;
+            transition: opacity 0.2s;
+        }
+        button:hover {
+            opacity: 0.8;
         }
     </style>
 </head>
 <body>
 
-    <canvas id="mathCanvas" width="700" height="600"></canvas>
-    <button onclick="download()">Download Image</button>
+    <canvas id="vectorCanvas" width="600" height="500"></canvas>
+    <button onclick="downloadImage()">Download Diagram</button>
 
     <script>
-        const canvas = document.getElementById('mathCanvas');
+        const canvas = document.getElementById('vectorCanvas');
         const ctx = canvas.getContext('2d');
 
-        function draw() {
-            const ox = 350; // Origin O
-            const oy = 500; // Horizontal base line
-            const scale = 100;
+        function drawDiagram() {
+            const ox = 100; // Origin X
+            const oy = 400; // Origin Y
+            const length = 350;
+            const angle = -Math.PI / 4; // 45 degrees upward
 
+            // Clear to white
             ctx.fillStyle = "white";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // --- 1. Clipping Path for Shading (Strips) ---
-            ctx.save();
-            ctx.beginPath();
-            // Outer Circle Path
-            for (let a = 0; a <= Math.PI + 0.05; a += 0.02) {
-                let r = 4 * Math.sin(a) * scale;
-                ctx.lineTo(ox + r * Math.cos(a), oy - r * Math.sin(a));
-            }
-            // Inner Circle Path (reverse to create the "hole")
-            for (let a = Math.PI; a >= -0.05; a -= 0.02) {
-                let r = 2 * Math.sin(a) * scale;
-                ctx.lineTo(ox + r * Math.cos(a), oy - r * Math.sin(a));
-            }
-            ctx.closePath();
-            ctx.clip(); // Restrict drawing to the area between circles
-
-            // Draw diagonal strips within the clip
             ctx.strokeStyle = "black";
-            ctx.lineWidth = 1;
-            for (let i = -500; i < 700; i += 12) {
-                ctx.beginPath();
-                ctx.moveTo(i, 0);
-                ctx.lineTo(i + 400, 600);
-                ctx.stroke();
-            }
-            ctx.restore();
-
-            // --- 2. Outlines and Axes ---
-            ctx.strokeStyle = "black";
-            ctx.lineWidth = 2.5;
-
-            // Horizontal line
-            ctx.beginPath();
-            ctx.moveTo(50, oy);
-            ctx.lineTo(650, oy);
-            ctx.stroke();
-
-            // Vertical axis with arrowhead
-            ctx.beginPath();
-            ctx.moveTo(ox, oy);
-            ctx.lineTo(ox, 50);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(ox - 8, 68);
-            ctx.lineTo(ox, 50);
-            ctx.lineTo(ox + 8, 68);
-            ctx.stroke();
-
-            // Function to draw circle outlines
-            const drawCircle = (mult) => {
-                ctx.beginPath();
-                for (let a = 0; a <= Math.PI + 0.05; a += 0.02) {
-                    let r = mult * Math.sin(a) * scale;
-                    ctx.lineTo(ox + r * Math.cos(a), oy - r * Math.sin(a));
-                }
-                ctx.stroke();
-            };
-            drawCircle(2);
-            drawCircle(4);
-
-            // Radial line
-            const angle = Math.PI / 3;
-            let rQ = 4 * Math.sin(angle) * scale;
-            let rP = 2 * Math.sin(angle) * scale;
-            let qx = ox + rQ * Math.cos(angle);
-            let qy = oy - rQ * Math.sin(angle);
-            let px = ox + rP * Math.cos(angle);
-            let py = oy - rP * Math.sin(angle);
-
-            ctx.beginPath();
-            ctx.moveTo(ox, oy);
-            ctx.lineTo(qx + 35, qy - 30);
-            ctx.stroke();
-
-            // Points
             ctx.fillStyle = "black";
-            ctx.beginPath(); ctx.arc(px, py, 5, 0, 7); ctx.fill();
-            ctx.beginPath(); ctx.arc(qx, qy, 5, 0, 7); ctx.fill();
+            ctx.lineWidth = 2;
 
-            // --- 3. Math Labels (Serif Cursive Style) ---
-            ctx.font = "italic 26px 'Times New Roman', serif";
-            ctx.fillText("O", ox - 10, oy + 35);
-            ctx.fillText("θ = 0", 490, oy - 15);
-            ctx.fillText("θ = π", 110, oy - 15);
-            ctx.fillText("P", px - 25, py);
-            ctx.fillText("Q", qx - 20, qy - 15);
+            // 1. Draw Axes
+            // Vertical axis (Y)
+            ctx.beginPath();
+            ctx.moveTo(ox, oy + 50);
+            ctx.lineTo(ox, 50);
+            ctx.stroke();
+
+            // Horizontal axis (X) with arrow
+            ctx.beginPath();
+            ctx.moveTo(ox - 20, oy);
+            ctx.lineTo(500, oy);
+            ctx.stroke();
+            // Arrowhead for X axis
+            ctx.beginPath();
+            ctx.moveTo(490, oy - 7);
+            ctx.lineTo(500, oy);
+            ctx.lineTo(490, oy + 7);
+            ctx.stroke();
+
+            // 2. Draw Vector 'r' (Hypotenuse)
+            const tx = ox + length * Math.cos(angle);
+            const ty = oy + length * Math.sin(angle);
+            ctx.beginPath();
+            ctx.moveTo(ox, oy);
+            ctx.lineTo(tx, ty);
+            ctx.stroke();
+
+            // 3. Draw Projections (Dashed/Right Triangle)
+            ctx.setLineDash([5, 5]); // Dashed line for the vertical drop
+            ctx.beginPath();
+            ctx.moveTo(tx, ty);
+            ctx.lineTo(tx, oy);
+            ctx.stroke();
+            ctx.setLineDash([]); // Reset to solid
+
+            // 4. Draw Angle 'θ' Arc
+            ctx.beginPath();
+            ctx.arc(ox, oy, 60, 0, angle, true);
+            ctx.stroke();
+
+            // 5. Labels (Math Type / Cursive Style)
+            ctx.font = "italic 28px 'Times New Roman', serif";
+
+            // θ label
+            ctx.fillText("θ", ox + 70, oy - 20);
             
-            ctx.font = "italic 24px 'Times New Roman', serif";
-            ctx.fillText("r = 2 sin θ", px + 15, py + 25);
-            ctx.fillText("r = 4 sin θ", qx + 15, qy);
+            // r label (centered on hypotenuse)
+            ctx.fillText("r", (ox + tx) / 2 - 20, (oy + ty) / 2 - 10);
+
+            // r cos θ label
+            ctx.fillText("r cos θ", (ox + tx) / 2 - 40, oy + 35);
+
+            // r sin θ label
+            ctx.fillText("r sin θ", tx + 15, (oy + ty) / 2 + 10);
+
+            // 'x' label at the base
+            ctx.fillText("x", tx - 10, oy + 35);
         }
 
-        function download() {
+        function downloadImage() {
             const link = document.createElement('a');
-            link.download = 'polar_hatching_diagram.png';
+            link.download = 'vector_projection.png';
             link.href = canvas.toDataURL("image/png");
             link.click();
         }
 
-        draw();
+        drawDiagram();
     </script>
 </body>
 </html>
-
