@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Vector Projection Diagram</title>
+    <title>Coordinate Geometry Diagram - No Shading</title>
     <style>
         body {
             display: flex;
@@ -12,42 +12,38 @@
             min-height: 100vh;
             margin: 0;
             background-color: #ffffff;
-            font-family: 'Times New Roman', serif;
+            font-family: serif;
         }
         canvas {
             background-color: #fff;
-            border: 1px solid #ddd;
+            border: 1px solid #eee;
         }
         button {
             margin-top: 20px;
-            padding: 12px 24px;
+            padding: 10px 20px;
             font-size: 16px;
             cursor: pointer;
             background: #000;
             color: #fff;
             border: none;
-            border-radius: 5px;
-            transition: opacity 0.2s;
-        }
-        button:hover {
-            opacity: 0.8;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
 
-    <canvas id="vectorCanvas" width="600" height="500"></canvas>
-    <button onclick="downloadImage()">Download Diagram</button>
+    <canvas id="geometryCanvas" width="700" height="600"></canvas>
+    <button onclick="download()">Download Image</button>
 
     <script>
-        const canvas = document.getElementById('vectorCanvas');
+        const canvas = document.getElementById('geometryCanvas');
         const ctx = canvas.getContext('2d');
 
-        function drawDiagram() {
-            const ox = 100; // Origin X
-            const oy = 400; // Origin Y
-            const length = 350;
-            const angle = -Math.PI / 4; // 45 degrees upward
+        function draw() {
+            // Coordinate mapping settings
+            const ox = 150; // Origin O position
+            const oy = 500;
+            const unit = 120; // Pixels per coordinate unit
 
             // Clear to white
             ctx.fillStyle = "white";
@@ -55,75 +51,81 @@
 
             ctx.strokeStyle = "black";
             ctx.fillStyle = "black";
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 2.5;
 
-            // 1. Draw Axes
-            // Vertical axis (Y)
+            // Define points based on the image coordinates
+            const pA = { x: ox + 1 * unit, y: oy - 0 * unit }; // A(1,0)
+            const pB = { x: ox + 3 * unit, y: oy - 1 * unit }; // B(3,1)
+            const pC = { x: ox + 2 * unit, y: oy - 2 * unit }; // C(2,2)
+            const pD = { x: ox + 0 * unit, y: oy - 1 * unit }; // D(0,1)
+
+            // --- 1. Draw Quadrilateral Outline (No Shading) ---
             ctx.beginPath();
-            ctx.moveTo(ox, oy + 50);
+            ctx.moveTo(pA.x, pA.y);
+            ctx.lineTo(pB.x, pB.y);
+            ctx.lineTo(pC.x, pC.y);
+            ctx.lineTo(pD.x, pD.y);
+            ctx.closePath();
+            ctx.stroke();
+
+            // --- 2. Draw Axes ---
+            // Y-axis
+            ctx.beginPath();
+            ctx.moveTo(ox, oy + 20);
             ctx.lineTo(ox, 50);
             ctx.stroke();
+            // Y-axis arrowhead
+            ctx.beginPath();
+            ctx.moveTo(ox - 8, 65);
+            ctx.lineTo(ox, 50);
+            ctx.lineTo(ox + 8, 65);
+            ctx.stroke();
 
-            // Horizontal axis (X) with arrow
+            // X-axis
             ctx.beginPath();
             ctx.moveTo(ox - 20, oy);
-            ctx.lineTo(500, oy);
+            ctx.lineTo(600, oy);
             ctx.stroke();
-            // Arrowhead for X axis
+            // X-axis arrowhead
             ctx.beginPath();
-            ctx.moveTo(490, oy - 7);
-            ctx.lineTo(500, oy);
-            ctx.lineTo(490, oy + 7);
+            ctx.moveTo(585, oy - 8);
+            ctx.lineTo(600, oy);
+            ctx.lineTo(585, oy + 8);
             ctx.stroke();
 
-            // 2. Draw Vector 'r' (Hypotenuse)
-            const tx = ox + length * Math.cos(angle);
-            const ty = oy + length * Math.sin(angle);
-            ctx.beginPath();
-            ctx.moveTo(ox, oy);
-            ctx.lineTo(tx, ty);
-            ctx.stroke();
+            // --- 3. Labels (Math Serif / Cursive Style) ---
+            ctx.font = "italic 24px 'Times New Roman', serif";
 
-            // 3. Draw Projections (Dashed/Right Triangle)
-            ctx.setLineDash([5, 5]); // Dashed line for the vertical drop
-            ctx.beginPath();
-            ctx.moveTo(tx, ty);
-            ctx.lineTo(tx, oy);
-            ctx.stroke();
-            ctx.setLineDash([]); // Reset to solid
+            // Origin O
+            ctx.fillText("O", ox - 25, oy + 25);
 
-            // 4. Draw Angle 'θ' Arc
-            ctx.beginPath();
-            ctx.arc(ox, oy, 60, 0, angle, true);
-            ctx.stroke();
+            // Points with coordinates
+            ctx.fillText("A(1,0)", pA.x - 10, pA.y + 35);
+            ctx.fillText("B(3,1)", pB.x + 10, pB.y + 5);
+            ctx.fillText("C(2,2)", pC.x + 10, pC.y - 5);
+            ctx.fillText("D(0,1)", pD.x - 75, pD.y + 5);
 
-            // 5. Labels (Math Type / Cursive Style)
-            ctx.font = "italic 28px 'Times New Roman', serif";
-
-            // θ label
-            ctx.fillText("θ", ox + 70, oy - 20);
+            // Axis titles
+            ctx.fillText("y axis", ox - 70, 75);
+            ctx.fillText("x-axis", 580, oy + 35);
             
-            // r label (centered on hypotenuse)
-            ctx.fillText("r", (ox + tx) / 2 - 20, (oy + ty) / 2 - 10);
-
-            // r cos θ label
-            ctx.fillText("r cos θ", (ox + tx) / 2 - 40, oy + 35);
-
-            // r sin θ label
-            ctx.fillText("r sin θ", tx + 15, (oy + ty) / 2 + 10);
-
-            // 'x' label at the base
-            ctx.fillText("x", tx - 10, oy + 35);
+            // Draw coordinate point dots
+            const points = [pA, pB, pC, pD];
+            points.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+                ctx.fill();
+            });
         }
 
-        function downloadImage() {
+        function download() {
             const link = document.createElement('a');
-            link.download = 'vector_projection.png';
+            link.download = 'coordinate_diagram_outline.png';
             link.href = canvas.toDataURL("image/png");
             link.click();
         }
 
-        drawDiagram();
+        draw();
     </script>
 </body>
 </html>
