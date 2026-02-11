@@ -3,147 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hand-Drawn Graph Replica</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com" rel="stylesheet">
+    <title>Hand-Drawn Math Diagram Replicated</title>
     <style>
         body {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
+            height: 100vh;
             margin: 0;
-            background-color: #fcfcfc;
-            font-family: 'EB Garamond', serif;
+            background-color: #f0f0f0;
+            font-family: 'Times New Roman', Times, serif;
         }
-        #container {
-            background-color: white;
+        #canvasContainer {
+            background: white;
             padding: 20px;
-            border-radius: 4px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
         }
         canvas {
-            cursor: crosshair;
-        }
-        .controls {
-            margin-top: 20px;
+            border: 1px solid #ddd;
         }
         button {
-            padding: 10px 25px;
+            margin-top: 20px;
+            padding: 10px 20px;
             font-size: 16px;
             cursor: pointer;
-            background-color: #000;
-            color: #fff;
+            background-color: #007bff;
+            color: white;
             border: none;
-            border-radius: 2px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
 
-    <div id="container">
-        <canvas id="replicaCanvas" width="650" height="550"></canvas>
-    </div>
+<div id="canvasContainer">
+    <canvas id="mathCanvas" width="400" height="400"></canvas>
+</div>
 
-    <div class="controls">
-        <button id="downloadBtn">Download Image</button>
-    </div>
+<button id="downloadBtn">Download Image</button>
 
-    <script>
-        const canvas = document.getElementById('replicaCanvas');
-        const ctx = canvas.getContext('2d');
+<script>
+    const canvas = document.getElementById('mathCanvas');
+    const ctx = canvas.getContext('2d');
 
-        function drawReplica() {
-            const ox = 200; 
-            const oy = 300; 
-            const unit = 65;
-            const fourA = 4 * unit;
+    function drawDiagram() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
 
-            ctx.fillStyle = "white";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // Set Math Font
+        ctx.font = 'italic 24px "Times New Roman"';
+        ctx.fillStyle = 'black';
 
-            ctx.strokeStyle = "black";
-            ctx.fillStyle = "black";
-            ctx.lineWidth = 2.5;
-            ctx.lineCap = "round";
-            ctx.font = 'italic 28px "EB Garamond", serif';
+        // 1. Axes
+        ctx.beginPath();
+        ctx.moveTo(80, 50);
+        ctx.lineTo(80, 350);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(70, 70); ctx.lineTo(80, 50); ctx.lineTo(90, 70);
+        ctx.stroke();
+        ctx.fillText('Y', 45, 75);
 
-            // 1. AXES
+        ctx.beginPath();
+        ctx.moveTo(80, 350);
+        ctx.lineTo(350, 350);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(330, 340); ctx.lineTo(350, 350); ctx.lineTo(330, 360);
+        ctx.stroke();
+        ctx.fillText('X', 355, 365);
+
+        // 2. Parabola/Curve (y = sqrt(2(2-x)))
+        ctx.beginPath();
+        ctx.moveTo(80, 80); 
+        ctx.quadraticCurveTo(300, 80, 300, 350); 
+        ctx.stroke();
+
+        // 3. Line (y = 2 - x)
+        ctx.beginPath();
+        ctx.moveTo(80, 80); 
+        ctx.lineTo(300, 350); 
+        ctx.stroke();
+
+        // 4. Labels A and B
+        ctx.fillText('B', 95, 75);
+        ctx.fillText('A', 305, 340);
+
+        // 5. Equations
+        ctx.font = 'italic 18px "Times New Roman"';
+        ctx.fillText('y = √2(2-x)', 200, 40);
+        ctx.fillText('y² = 2(2-x)', 210, 80);
+        
+        // MOVED CLOSER: Translation adjusted to pull label tighter to the line
+        ctx.save();
+        ctx.translate(140, 180); 
+        ctx.rotate(Math.atan2(270, 220));
+        ctx.fillText('y = 2 - x', 10, 30); 
+        ctx.restore();
+
+        // 6. Shaded Region with Diagonal Strips
+        const startX = 185;
+        const endX = 215;
+        
+        const yLineStart = 80 + (startX - 80) * (270 / 220); 
+        const yLineEnd = 80 + (endX - 80) * (270 / 220);     
+        
+        // REDUCED HEIGHT: Adjusted Y values to sit exactly on the curve y² path
+        const yCurveStart = 107; 
+        const yCurveEnd = 125;   
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(startX, yLineStart); 
+        ctx.lineTo(endX, yLineEnd);   
+        ctx.lineTo(endX, yCurveEnd);   
+        ctx.quadraticCurveTo(200, 110, startX, yCurveStart); 
+        ctx.closePath();
+        ctx.clip(); 
+        
+        ctx.lineWidth = 1.5; // Slightly thicker for a more hand-drawn look
+        for (let i = -100; i < 600; i += 8) {
             ctx.beginPath();
-            ctx.moveTo(50, oy); ctx.lineTo(550, oy);
-            ctx.moveTo(ox, 500); ctx.lineTo(ox, 60);
+            ctx.moveTo(0, i);
+            ctx.lineTo(i, 0);
             ctx.stroke();
-
-            // Axis Labels
-            ctx.fillText('x', 560, oy + 10);
-            ctx.fillText('x', 20, oy + 10);
-            ctx.fillText('y', ox - 15, 50);
-            ctx.fillText('y', ox - 15, 530);
-            ctx.fillText('(0,0)', ox - 85, oy + 35);
-
-            // 2. CURVES
-            // Curve y² = 4ax
-            ctx.beginPath();
-            for (let y = -220; y <= fourA + 30; y++) {
-                let x = (y * y) / (4 * unit);
-                if (y === -220) ctx.moveTo(ox + x, oy - y);
-                else ctx.lineTo(ox + x, oy - y);
-            }
-            ctx.stroke();
-
-            // Curve x² = 4ay
-            ctx.beginPath();
-            for (let x = -150; x <= fourA + 30; x++) {
-                let y = (x * x) / (4 * unit);
-                if (x === -150) ctx.moveTo(ox + x, oy - y);
-                else ctx.lineTo(ox + x, oy - y);
-            }
-            ctx.stroke();
-
-            // 3. CURVE LABELS
-            ctx.save();
-            ctx.translate(ox + 80, oy - 210);
-            ctx.rotate(-Math.PI / 6);
-            ctx.fillText('y² = 4ax', 0, 0);
-            ctx.restore();
-
-            ctx.fillText('x² = 4ay', ox + 280, oy - 150);
-
-            // 4. INTERSECTION AND MARKINGS
-            ctx.beginPath();
-            ctx.arc(ox + fourA, oy - fourA, 5, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // SHIFTED A(4a, 4a) TO THE RIGHT
-            ctx.fillText('A(4a, 4a)', ox + fourA + 15, oy - fourA + 10);
-            
-            ctx.fillText('4a', ox + fourA - 20, oy + 40);
-
-            // 5. THE HORIZONTAL STRIP PQ
-            const stripY = 150; 
-            const px = (stripY * stripY) / (4 * unit);
-            const qx = Math.sqrt(4 * unit * stripY);
-
-            ctx.lineWidth = 14; 
-            ctx.beginPath();
-            ctx.moveTo(ox + px + 5, oy - stripY);
-            ctx.lineTo(ox + qx - 5, oy - stripY);
-            ctx.stroke();
-
-            ctx.lineWidth = 2;
-            ctx.fillText('P', ox + px - 30, oy - stripY + 10);
-            ctx.fillText('Q', ox + qx + 10, oy - stripY + 10);
         }
+        ctx.restore();
+        
+        // Redraw vertical strip boundary lines
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(startX, yLineStart); ctx.lineTo(startX, yCurveStart);
+        ctx.moveTo(endX, yLineEnd); ctx.lineTo(endX, yCurveEnd);
+        ctx.stroke();
+    }
 
-        document.getElementById('downloadBtn').addEventListener('click', () => {
-            const link = document.createElement('a');
-            link.download = 'exact_image_replica.png';
-            link.href = canvas.toDataURL();
-            link.click();
-        });
+    drawDiagram();
 
-        document.fonts.ready.then(drawReplica);
-    </script>
+    document.getElementById('downloadBtn').addEventListener('click', function() {
+        const link = document.createElement('a');
+        link.download = 'exact-math-diagram.png';
+        link.href = canvas.toDataURL();
+        link.click();
+    });
+</script>
+
 </body>
 </html>
