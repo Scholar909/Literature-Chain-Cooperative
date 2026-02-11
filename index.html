@@ -2,29 +2,29 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Coordinate Geometry Diagram - No Shading</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exact Diagram Replication</title>
     <style>
         body {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
+            height: 100vh;
+            background-color: #f0f0f0;
             margin: 0;
-            background-color: #ffffff;
-            font-family: serif;
         }
         canvas {
-            background-color: #fff;
-            border: 1px solid #eee;
+            background-color: white;
+            border: 1px solid #ccc;
         }
         button {
             margin-top: 20px;
             padding: 10px 20px;
             font-size: 16px;
             cursor: pointer;
-            background: #000;
-            color: #fff;
+            background-color: #333;
+            color: white;
             border: none;
             border-radius: 4px;
         }
@@ -32,100 +32,76 @@
 </head>
 <body>
 
-    <canvas id="geometryCanvas" width="700" height="600"></canvas>
-    <button onclick="download()">Download Image</button>
+    <canvas id="diagramCanvas" width="600" height="500"></canvas>
+    <button onclick="downloadImage()">Download as Image</button>
 
     <script>
-        const canvas = document.getElementById('geometryCanvas');
+        const canvas = document.getElementById('diagramCanvas');
         const ctx = canvas.getContext('2d');
 
-        function draw() {
-            // Coordinate mapping settings
-            const ox = 150; // Origin O position
-            const oy = 500;
-            const unit = 120; // Pixels per coordinate unit
+        function drawDiagram() {
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2;
+            ctx.font = 'italic 22px "Times New Roman", serif'; 
+            ctx.fillStyle = 'black';
 
-            // Clear to white
-            ctx.fillStyle = "white";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.strokeStyle = "black";
-            ctx.fillStyle = "black";
-            ctx.lineWidth = 2.5;
-
-            // Define points based on the image coordinates
-            const pA = { x: ox + 1 * unit, y: oy - 0 * unit }; // A(1,0)
-            const pB = { x: ox + 3 * unit, y: oy - 1 * unit }; // B(3,1)
-            const pC = { x: ox + 2 * unit, y: oy - 2 * unit }; // C(2,2)
-            const pD = { x: ox + 0 * unit, y: oy - 1 * unit }; // D(0,1)
-
-            // --- 1. Draw Quadrilateral Outline (No Shading) ---
+            // --- V-axis ---
             ctx.beginPath();
-            ctx.moveTo(pA.x, pA.y);
-            ctx.lineTo(pB.x, pB.y);
-            ctx.lineTo(pC.x, pC.y);
-            ctx.lineTo(pD.x, pD.y);
-            ctx.closePath();
+            ctx.moveTo(100, 420);
+            ctx.lineTo(100, 40);
+            ctx.stroke();
+            // Arrowhead
+            ctx.lineTo(95, 55); ctx.moveTo(100, 40); ctx.lineTo(105, 55);
+            ctx.stroke();
+            ctx.fillText('V-axis', 20, 35);
+
+            // --- u-axis ---
+            ctx.beginPath();
+            ctx.moveTo(80, 210);
+            ctx.lineTo(550, 170); // Slight upward angle like the sketch
+            ctx.stroke();
+            ctx.fillText('u-axis', 500, 205);
+
+            // --- Rectangle Boundaries ---
+            const xLeft = 180, xRight = 420;
+            const yTop = 60, yBottom = 400;
+
+            ctx.beginPath();
+            ctx.moveTo(xLeft, yTop); ctx.lineTo(xRight, yTop); // Top
+            ctx.moveTo(xRight, yTop); ctx.lineTo(xRight, yBottom); // Right
+            ctx.moveTo(xRight, yBottom); ctx.lineTo(xLeft, yBottom); // Bottom
+            ctx.moveTo(xLeft, yBottom); ctx.lineTo(xLeft, yTop); // Left
             ctx.stroke();
 
-            // --- 2. Draw Axes ---
-            // Y-axis
+            // --- The Thicker Middle Line ---
             ctx.beginPath();
-            ctx.moveTo(ox, oy + 20);
-            ctx.lineTo(ox, 50);
+            ctx.lineWidth = 4; // Making it noticeably thicker
+            ctx.moveTo(xLeft, 110);
+            ctx.lineTo(xRight, 100);
             ctx.stroke();
-            // Y-axis arrowhead
-            ctx.beginPath();
-            ctx.moveTo(ox - 8, 65);
-            ctx.lineTo(ox, 50);
-            ctx.lineTo(ox + 8, 65);
-            ctx.stroke();
+            ctx.lineWidth = 2; // Reset
 
-            // X-axis
-            ctx.beginPath();
-            ctx.moveTo(ox - 20, oy);
-            ctx.lineTo(600, oy);
-            ctx.stroke();
-            // X-axis arrowhead
-            ctx.beginPath();
-            ctx.moveTo(585, oy - 8);
-            ctx.lineTo(600, oy);
-            ctx.lineTo(585, oy + 8);
-            ctx.stroke();
+            // --- Labels ---
+            ctx.fillText('R(1, 1)', xLeft - 60, yTop + 5);
+            ctx.fillText('S(4, 1)', xRight + 10, yTop + 5);
+            ctx.fillText('Q(1, -2)', xLeft - 15, yBottom + 35);
+            ctx.fillText('P(4, -2)', xRight - 20, yBottom + 35);
 
-            // --- 3. Labels (Math Serif / Cursive Style) ---
-            ctx.font = "italic 24px 'Times New Roman', serif";
-
-            // Origin O
-            ctx.fillText("O", ox - 25, oy + 25);
-
-            // Points with coordinates
-            ctx.fillText("A(1,0)", pA.x - 10, pA.y + 35);
-            ctx.fillText("B(3,1)", pB.x + 10, pB.y + 5);
-            ctx.fillText("C(2,2)", pC.x + 10, pC.y - 5);
-            ctx.fillText("D(0,1)", pD.x - 75, pD.y + 5);
-
-            // Axis titles
-            ctx.fillText("y axis", ox - 70, 75);
-            ctx.fillText("x-axis", 580, oy + 35);
-            
-            // Draw coordinate point dots
-            const points = [pA, pB, pC, pD];
-            points.forEach(p => {
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
-                ctx.fill();
-            });
+            // V-axis labels (arranged vertically like the sketch)
+            ctx.fillText('y', 40, 110);
+            ctx.fillText('1', 40, 150);
+            ctx.fillText('-2y', 30, 190);
+            ctx.fillText('-2', 35, 230);
         }
 
-        function download() {
+        function downloadImage() {
             const link = document.createElement('a');
-            link.download = 'coordinate_diagram_outline.png';
-            link.href = canvas.toDataURL("image/png");
+            link.download = 'exact_diagram.png';
+            link.href = canvas.toDataURL();
             link.click();
         }
 
-        draw();
+        drawDiagram();
     </script>
 </body>
 </html>
