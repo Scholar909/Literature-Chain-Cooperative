@@ -2,114 +2,189 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Integration Graph 2026</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geometric Diagram Replica</title>
     <style>
-        body { background-color: #f4f4f4; display: flex; flex-direction: column; align-items: center; padding: 20px; font-family: sans-serif; }
-        #canvasBox { background: white; padding: 10px; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        canvas { background-color: white; }
-        .controls { margin-top: 20px; }
-        button { padding: 12px 24px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            background-color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 1px solid #ccc;
+        }
+        #controls {
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
 
-<div id="canvasBox">
-    <canvas id="mathCanvas" width="600" height="600"></canvas>
-</div>
+    <canvas id="geometryCanvas" width="800" height="600"></canvas>
+    
+    <div id="controls">
+        <button id="downloadBtn">Download Image</button>
+    </div>
 
-<div class="controls">
-    <button onclick="downloadImage()">Download Graph</button>
-</div>
+    <script>
+        const canvas = document.getElementById('geometryCanvas');
+        const ctx = canvas.getContext('2d');
+        const downloadBtn = document.getElementById('downloadBtn');
 
-<script>
-    const canvas = document.getElementById('mathCanvas');
-    const ctx = canvas.getContext('2d');
-    const size = 600;
-    const center = size / 2;
-    const scale = 200; // 1 unit = 200 pixels
+        function drawDiagram() {
+            const origin = { x: 100, y: 500 };
+            const scale = 350;
 
-    function draw() {
-        // Pure white background for 'Word' look
-        ctx.fillStyle = "white";
-        ctx.fillRect(0, 0, size, size);
+            // Setup styling
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2;
+            ctx.font = 'italic 20px Times New Roman';
+            ctx.fillStyle = 'black';
 
-        // Draw Axes (Positive and Negative)
-        ctx.strokeStyle = "#333";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(0, center); ctx.lineTo(size, center); // X Axis
-        ctx.moveTo(center, 0); ctx.lineTo(center, size); // Y Axis
-        ctx.stroke();
-
-        // Axis Labels at end tips
-        ctx.fillStyle = "black";
-        ctx.font = "italic 16px serif";
-        ctx.fillText("x", size - 15, center + 20);
-        ctx.fillText("y", center - 20, 15);
-
-        // DRAW VERTICAL STRIPS in bounded area [0, 1]
-        const stripCount = 21; // Odd number to have a clear middle strip
-        const step = 1 / (stripCount - 1);
-        const middleIndex = Math.floor(stripCount / 2);
-
-        for (let i = 0; i < stripCount; i++) {
-            let xVal = i * step;
-            let canvasX = center + (xVal * scale);
-            
-            // Curve values: Upper is y=x, Lower is y=x^2
-            let yTop = center - (xVal * scale);
-            let yBottom = center - (Math.pow(xVal, 2) * scale);
-
+            // 1. Draw Axes
             ctx.beginPath();
-            ctx.strokeStyle = "#888";
-            // Middle strip thicker by 3% of standard lineWidth (approx 1.03 vs 1.0)
-            ctx.lineWidth = (i === middleIndex) ? 3.09 : 1.0; 
-            ctx.moveTo(canvasX, yBottom);
-            ctx.lineTo(canvasX, yTop);
+            // Y-axis
+            ctx.moveTo(origin.x, origin.y);
+            ctx.lineTo(origin.x, 50);
+            ctx.stroke();
+            // X-axis
+            ctx.beginPath();
+            ctx.moveTo(origin.x, origin.y);
+            ctx.lineTo(750, origin.y);
+            ctx.stroke();
+
+            // Arrows for axes
+            drawArrow(origin.x, 50, -Math.PI/2);
+            drawArrow(750, origin.y, 0);
+
+            // Labels for axes
+            ctx.fillText('y-axis', origin.x - 60, 60);
+            ctx.fillText('x-axis', 700, origin.y + 30);
+            ctx.fillText('O', origin.x - 25, origin.y + 25);
+
+            // 2. Angles and Radial Lines
+            const theta1 = -Math.PI / 12; // Lower line
+            const theta = -Math.PI / 6;  // Middle line
+            const dTheta = -Math.PI / 18; // Gap for shaded region
+            const theta2 = -Math.PI / 3; // Upper line
+
+            const radii = [scale * 0.8, scale * 1.1]; // P/A and Q/B distances
+
+            // Draw radial lines
+            drawLine(origin, theta1, scale * 1.2);
+            drawLine(origin, theta, scale * 1.3);
+            drawLine(origin, theta + dTheta, scale * 1.3);
+            drawLine(origin, theta2, scale * 1.2);
+
+            // 3. Draw Curves (Arcs)
+            drawArc(origin, radii[0], theta1, theta2);
+            drawArc(origin, radii[1], theta1, theta2);
+
+            // 4. Shaded Region (PQ area)
+            ctx.beginPath();
+            ctx.moveTo(origin.x + Math.cos(theta) * radii[0], origin.y + Math.sin(theta) * radii[0]);
+            ctx.lineTo(origin.x + Math.cos(theta) * radii[1], origin.y + Math.sin(theta) * radii[1]);
+            ctx.arc(origin.x, origin.y, radii[1], theta, theta + dTheta, true);
+            ctx.lineTo(origin.x + Math.cos(theta + dTheta) * radii[0], origin.y + Math.sin(theta + dTheta) * radii[0]);
+            ctx.arc(origin.x, origin.y, radii[0], theta + dTheta, theta, false);
+            
+            // Hatching effect
+            ctx.save();
+            ctx.clip();
+            for (let i = -100; i < 800; i += 10) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i + 100, 600);
+                ctx.stroke();
+            }
+            ctx.restore();
+
+            // 5. Labels (A, B, C, D, P, Q)
+            placeLabel('A', origin, radii[0], theta1, 10, 25);
+            placeLabel('C', origin, radii[1], theta1, 10, 25);
+            placeLabel('P', origin, radii[0], theta, -20, -10);
+            placeLabel('Q', origin, radii[1], theta + dTheta, 15, 10);
+            placeLabel('B', origin, radii[0], theta2, -25, 0);
+            placeLabel('D', origin, radii[1], theta2, -20, -20);
+
+            // 6. Angle Labels (θ, θ1, θ2, dθ)
+            drawAngleArc(origin, 60, 0, theta1, 'θ₁', 15);
+            drawAngleArc(origin, 90, 0, theta, 'θ', 15);
+            drawAngleArc(origin, 130, 0, theta2, 'θ₂', 25);
+            // dθ label
+            const midDTheta = theta + dTheta / 2;
+            ctx.fillText('dθ', origin.x + Math.cos(midDTheta) * 110, origin.y + Math.sin(midDTheta) * 110);
+        }
+
+        function drawLine(start, angle, length) {
+            ctx.beginPath();
+            ctx.moveTo(start.x, start.y);
+            ctx.lineTo(start.x + Math.cos(angle) * length, start.y + Math.sin(angle) * length);
             ctx.stroke();
         }
 
-        // DRAW y = x
-        ctx.strokeStyle = "blue";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(center - scale, center + scale); // (-1, -1)
-        ctx.lineTo(center + scale, center - scale); // (1, 1)
-        ctx.stroke();
-        ctx.fillText("y = x", center + scale + 5, center - scale);
-
-        // DRAW y = x^2
-        ctx.strokeStyle = "red";
-        ctx.beginPath();
-        for (let x = -1.2; x <= 1.2; x += 0.01) {
-            let cx = center + (x * scale);
-            let cy = center - (Math.pow(x, 2) * scale);
-            if (x === -1.2) ctx.moveTo(cx, cy);
-            else ctx.lineTo(cx, cy);
-        }
-        ctx.stroke();
-        ctx.fillText("y = x²", center + (1.2 * scale) - 40, center - (Math.pow(1.2, 2) * scale));
-
-        // Mark Points (0,0) and (1,1)
-        const points = [{x: 0, y: 0, n: "(0,0)"}, {x: 1, y: 1, n: "(1,1)"}];
-        ctx.fillStyle = "black";
-        points.forEach(p => {
+        function drawArc(center, radius, startAngle, endAngle) {
             ctx.beginPath();
-            ctx.arc(center + p.x * scale, center - p.y * scale, 4, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillText(p.n, center + p.x * scale + 8, center - p.y * scale - 8);
+            ctx.arc(center.x, center.y, radius, startAngle, endAngle, true);
+            ctx.stroke();
+        }
+
+        function drawAngleArc(center, radius, start, end, label, offset) {
+            ctx.beginPath();
+            ctx.arc(center.x, center.y, radius, start, end, true);
+            ctx.stroke();
+            const mid = (start + end) / 2;
+            ctx.fillText(label, center.x + Math.cos(mid) * (radius + offset), center.y + Math.sin(mid) * (radius + offset));
+        }
+
+        function placeLabel(text, origin, r, theta, offX, offY) {
+            const x = origin.x + Math.cos(theta) * r + offX;
+            const y = origin.y + Math.sin(theta) * r + offY;
+            ctx.fillText(text, x, y);
+        }
+
+        function drawArrow(x, y, angle) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle);
+            ctx.beginPath();
+            ctx.moveTo(-10, -5);
+            ctx.lineTo(0, 0);
+            ctx.lineTo(-10, 5);
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        // Initialize drawing
+        drawDiagram();
+
+        // Download functionality
+        downloadBtn.addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.download = 'geometry-diagram.png';
+            link.href = canvas.toDataURL();
+            link.click();
         });
-    }
-
-    function downloadImage() {
-        const link = document.createElement('a');
-        link.download = 'graph_y_x_squared_2026.png';
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-    }
-
-    draw();
-</script>
-
+    </script>
 </body>
 </html>
