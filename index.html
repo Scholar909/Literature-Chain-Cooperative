@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Geometric Diagram Replication</title>
-    <link href="https://fonts.googleapis.com" rel="preconnect">
-    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+    <title>Hand-Drawn Graph Replica</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com" rel="stylesheet">
     <style>
         body {
@@ -15,42 +15,35 @@
             justify-content: center;
             min-height: 100vh;
             margin: 0;
-            background-color: #f8f8f8;
+            background-color: #fcfcfc;
             font-family: 'EB Garamond', serif;
         }
         #container {
             background-color: white;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            border-radius: 12px;
+            padding: 20px;
+            border-radius: 4px;
         }
         canvas {
-            border: 1px solid #eee;
+            cursor: crosshair;
         }
         .controls {
-            margin-top: 25px;
+            margin-top: 20px;
         }
         button {
-            padding: 12px 24px;
+            padding: 10px 25px;
             font-size: 16px;
-            font-weight: bold;
             cursor: pointer;
-            background-color: #333;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            transition: all 0.2s;
-        }
-        button:hover {
             background-color: #000;
-            transform: translateY(-1px);
+            color: #fff;
+            border: none;
+            border-radius: 2px;
         }
     </style>
 </head>
 <body>
 
     <div id="container">
-        <canvas id="diagramCanvas" width="700" height="500"></canvas>
+        <canvas id="replicaCanvas" width="650" height="550"></canvas>
     </div>
 
     <div class="controls">
@@ -58,102 +51,99 @@
     </div>
 
     <script>
-        const canvas = document.getElementById('diagramCanvas');
+        const canvas = document.getElementById('replicaCanvas');
         const ctx = canvas.getContext('2d');
 
-        function draw() {
-            const originX = 60;
-            const originY = 430;
+        function drawReplica() {
+            const ox = 200; 
+            const oy = 300; 
+            const unit = 65;
+            const fourA = 4 * unit;
 
-            // Clear and set background
             ctx.fillStyle = "white";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Styling for lines
-            ctx.strokeStyle = 'black';
-            ctx.fillStyle = 'black';
-            ctx.lineJoin = 'round';
-            ctx.font = 'italic 26px "EB Garamond", serif';
+            ctx.strokeStyle = "black";
+            ctx.fillStyle = "black";
+            ctx.lineWidth = 2.5;
+            ctx.lineCap = "round";
+            ctx.font = 'italic 28px "EB Garamond", serif';
 
-            // 1. DRAW THE FOUR LINES
-            // Line 4: Normal X-Axis
+            // 1. AXES
             ctx.beginPath();
+            ctx.moveTo(50, oy); ctx.lineTo(550, oy);
+            ctx.moveTo(ox, 500); ctx.lineTo(ox, 60);
+            ctx.stroke();
+
+            // Axis Labels
+            ctx.fillText('x', 560, oy + 10);
+            ctx.fillText('x', 20, oy + 10);
+            ctx.fillText('y', ox - 15, 50);
+            ctx.fillText('y', ox - 15, 530);
+            ctx.fillText('(0,0)', ox - 85, oy + 35);
+
+            // 2. CURVES
+            // Curve y² = 4ax
+            ctx.beginPath();
+            for (let y = -220; y <= fourA + 30; y++) {
+                let x = (y * y) / (4 * unit);
+                if (y === -220) ctx.moveTo(ox + x, oy - y);
+                else ctx.lineTo(ox + x, oy - y);
+            }
+            ctx.stroke();
+
+            // Curve x² = 4ay
+            ctx.beginPath();
+            for (let x = -150; x <= fourA + 30; x++) {
+                let y = (x * x) / (4 * unit);
+                if (x === -150) ctx.moveTo(ox + x, oy - y);
+                else ctx.lineTo(ox + x, oy - y);
+            }
+            ctx.stroke();
+
+            // 3. CURVE LABELS
+            ctx.save();
+            ctx.translate(ox + 80, oy - 210);
+            ctx.rotate(-Math.PI / 6);
+            ctx.fillText('y² = 4ax', 0, 0);
+            ctx.restore();
+
+            ctx.fillText('x² = 4ay', ox + 280, oy - 150);
+
+            // 4. INTERSECTION AND MARKINGS
+            ctx.beginPath();
+            ctx.arc(ox + fourA, oy - fourA, 5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // SHIFTED A(4a, 4a) TO THE RIGHT
+            ctx.fillText('A(4a, 4a)', ox + fourA + 15, oy - fourA + 10);
+            
+            ctx.fillText('4a', ox + fourA - 20, oy + 40);
+
+            // 5. THE HORIZONTAL STRIP PQ
+            const stripY = 150; 
+            const px = (stripY * stripY) / (4 * unit);
+            const qx = Math.sqrt(4 * unit * stripY);
+
+            ctx.lineWidth = 14; 
+            ctx.beginPath();
+            ctx.moveTo(ox + px + 5, oy - stripY);
+            ctx.lineTo(ox + qx - 5, oy - stripY);
+            ctx.stroke();
+
             ctx.lineWidth = 2;
-            ctx.setLineDash([]);
-            ctx.moveTo(originX, originY);
-            ctx.lineTo(600, originY);
-            ctx.stroke();
-            // X-axis label
-            ctx.fillText('x axis', 530, originY + 35);
-
-            // Line 1: Light (Dashed) top line - Adjusted to touch left side of oval
-            ctx.beginPath();
-            ctx.lineWidth = 1;
-            ctx.setLineDash([5, 5]);
-            ctx.moveTo(originX, originY);
-            ctx.lineTo(500, 10); 
-            ctx.stroke();
-
-            // Line 3: Light (Dashed) third line - Adjusted to touch right side of oval
-            ctx.beginPath();
-            ctx.moveTo(originX, originY);
-            ctx.lineTo(650, 278);
-            ctx.stroke();
-
-            // Line 2: Normal second line (The main diagonal)
-            ctx.setLineDash([]);
-            ctx.beginPath();
-            ctx.lineWidth = 2;
-            ctx.moveTo(originX, originY);
-            ctx.lineTo(600, 120);
-            ctx.stroke();
-
-            // 2. DRAW THE OVAL (on Line 2, bounded by Lines 1 and 3)
-            ctx.beginPath();
-            ctx.ellipse(420, 230, 150, 100, -0.5, 0, 2 * Math.PI);
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            // 3. ANGLE THETA (θ)
-            ctx.beginPath();
-            ctx.arc(originX, originY, 80, -Math.atan2(310, 540), 0);
-            ctx.stroke();
-            ctx.fillText('θ', originX + 90, originY - 25);
-
-            // 4. FIRST δr ARC (Between angle and oval on line 2)
-            ctx.beginPath();
-            ctx.arc(170, 368, 15, -1.8, 1.2);
-            ctx.stroke();
-            ctx.fillText('δr', 160, 345);
-
-            // 5. INTERNAL ARCS AND LABELS (Smaller, first-quadrant sector style)
-            // Arc PR
-            ctx.beginPath();
-            ctx.arc(370, 255, 25, -Math.PI/2, 0); 
-            ctx.stroke();
-            ctx.fillText('P', 375, 285);
-            ctx.fillText('R', 335, 235);
-
-            // Arc SQ
-            ctx.beginPath();
-            ctx.arc(445, 210, 25, -Math.PI/2, 0);
-            ctx.stroke();
-            ctx.fillText('S', 480, 230);
-            ctx.fillText('Q', 450, 175);
-
-            // Second δr label between internal arcs
-            ctx.fillText('δr', 400, 245);
+            ctx.fillText('P', ox + px - 30, oy - stripY + 10);
+            ctx.fillText('Q', ox + qx + 10, oy - stripY + 10);
         }
 
         document.getElementById('downloadBtn').addEventListener('click', () => {
             const link = document.createElement('a');
-            link.download = 'mathematical_diagram.png';
-            link.href = canvas.toDataURL('image/png');
+            link.download = 'exact_image_replica.png';
+            link.href = canvas.toDataURL();
             link.click();
         });
 
-        // Ensure font is loaded before drawing
-        document.fonts.ready.then(draw);
+        document.fonts.ready.then(drawReplica);
     </script>
 </body>
 </html>
