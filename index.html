@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculus Diagram Replication</title>
+    <title>Geometric Diagram Replication</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+    <link href="https://fonts.googleapis.com" rel="stylesheet">
     <style>
         body {
             display: flex;
@@ -11,141 +14,146 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            background-color: #f0f0f0;
             margin: 0;
-            font-family: 'Times New Roman', serif;
+            background-color: #f8f8f8;
+            font-family: 'EB Garamond', serif;
+        }
+        #container {
+            background-color: white;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 12px;
         }
         canvas {
-            background-color: white;
-            border: 1px solid #ccc;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: 1px solid #eee;
+        }
+        .controls {
+            margin-top: 25px;
         }
         button {
-            margin-top: 20px;
-            padding: 12px 25px;
+            padding: 12px 24px;
             font-size: 16px;
+            font-weight: bold;
             cursor: pointer;
-            background-color: #222;
+            background-color: #333;
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
+            transition: all 0.2s;
         }
-        button:hover { background-color: #444; }
+        button:hover {
+            background-color: #000;
+            transform: translateY(-1px);
+        }
     </style>
 </head>
 <body>
 
-    <canvas id="diagramCanvas" width="700" height="550"></canvas>
-    <button onclick="downloadImage()">Download as Image</button>
+    <div id="container">
+        <canvas id="diagramCanvas" width="700" height="500"></canvas>
+    </div>
+
+    <div class="controls">
+        <button id="downloadBtn">Download Image</button>
+    </div>
 
     <script>
         const canvas = document.getElementById('diagramCanvas');
         const ctx = canvas.getContext('2d');
 
         function draw() {
+            const originX = 60;
+            const originY = 430;
+
+            // Clear and set background
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Styling for lines
             ctx.strokeStyle = 'black';
-            ctx.lineWidth = 2;
-            ctx.font = 'italic 24px "Times New Roman", serif';
             ctx.fillStyle = 'black';
+            ctx.lineJoin = 'round';
+            ctx.font = 'italic 26px "EB Garamond", serif';
 
-            const originX = 150;
-            const originY = 450;
-
-            // --- Draw Axes ---
+            // 1. DRAW THE FOUR LINES
+            // Line 4: Normal X-Axis
             ctx.beginPath();
-            ctx.moveTo(originX, originY + 50);
-            ctx.lineTo(originX, 50);
-            ctx.stroke();
-            ctx.lineTo(originX - 6, 65); ctx.moveTo(originX, 50); ctx.lineTo(originX + 6, 65);
-            ctx.stroke();
-            ctx.fillText('y - axis', originX - 90, 70);
-
-            ctx.beginPath();
-            ctx.moveTo(originX - 50, originY);
+            ctx.lineWidth = 2;
+            ctx.setLineDash([]);
+            ctx.moveTo(originX, originY);
             ctx.lineTo(600, originY);
             ctx.stroke();
-            ctx.fillText('x - axis', 520, originY + 40);
-            ctx.fillText('0', originX - 30, originY + 30);
+            // X-axis label
+            ctx.fillText('x axis', 530, originY + 35);
 
-            // --- Draw Curved Region ABCD ---
-            const x1 = 230, x2 = 550;
-            const midX = (x1 + x2) / 2;
-
-            // Define curves for calculation
-            const getBottomY = (x) => {
-                const t = (x - x1) / (x2 - x1);
-                return (1 - t) * (1 - t) * 400 + 2 * (1 - t) * t * 360 + t * t * 380;
-            };
-            const getTopY = (x) => {
-                const t = (x - x1) / (x2 - x1);
-                return (1 - t) * (1 - t) * 80 + 2 * (1 - t) * t * 150 + t * t * 100;
-            };
-
+            // Line 1: Light (Dashed) top line - Adjusted to touch left side of oval
             ctx.beginPath();
-            ctx.moveTo(x1, 400);
-            ctx.quadraticCurveTo(midX, 360, x2, 380);
-            ctx.lineTo(x2, 100);
-            ctx.quadraticCurveTo(midX, 150, x1, 80);
-            ctx.lineTo(x1, 400);
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            ctx.moveTo(originX, originY);
+            ctx.lineTo(500, 10); 
             ctx.stroke();
 
-            // --- Vertical Strip and P/Q Element ---
-            const stripX1 = midX - 15;
-            const stripX2 = midX + 15;
-            
-            // Draw the two internal vertical lines touching top and bottom
+            // Line 3: Light (Dashed) third line - Adjusted to touch right side of oval
             ctx.beginPath();
-            ctx.moveTo(stripX1, getTopY(stripX1)); ctx.lineTo(stripX1, getBottomY(stripX1));
-            ctx.moveTo(stripX2, getTopY(stripX2)); ctx.lineTo(stripX2, getBottomY(stripX2));
+            ctx.moveTo(originX, originY);
+            ctx.lineTo(650, 278);
             ctx.stroke();
 
-            // The central shaded "delta" box
-            const boxY = 240;
-            const boxH = 30;
-            
-            ctx.save();
+            // Line 2: Normal second line (The main diagonal)
+            ctx.setLineDash([]);
             ctx.beginPath();
-            ctx.rect(stripX1, boxY, stripX2 - stripX1, boxH);
-            ctx.stroke();
-            ctx.clip(); 
-            
-            ctx.beginPath();
-            for(let i = -50; i < 100; i += 8) {
-                ctx.moveTo(stripX1 + i, boxY);
-                ctx.lineTo(stripX1 + i + 40, boxY + boxH);
-            }
-            ctx.stroke();
-            ctx.restore();
-
-            // --- Labels ---
-            ctx.fillText('A', x1 + 5, 430);
-            ctx.fillText('B', x2 - 20, 410);
-            ctx.fillText('C', x2 + 5, 90);
-            ctx.fillText('D', x1 - 25, 100);
-
-            ctx.fillText('P', stripX1 - 25, boxY + 20);
-            ctx.fillText('Q', stripX2 + 10, boxY + 20);
-            
-            ctx.fillText('δx', stripX1 - 55, boxY + 55);
-            ctx.fillText('δy', stripX2 + 70, boxY + 55);
-
-            ctx.beginPath();
-            ctx.moveTo(stripX1 - 10, boxY + 45); ctx.lineTo(stripX1 - 35, boxY + 45); 
-            ctx.moveTo(stripX2 + 10, boxY + 25); ctx.lineTo(stripX2 + 65, boxY + 45); 
+            ctx.lineWidth = 2;
+            ctx.moveTo(originX, originY);
+            ctx.lineTo(600, 120);
             ctx.stroke();
 
-            ctx.fillText('x = x₁', x1 - 70, 380);
-            ctx.fillText('x = x₂', x2 + 5, 370);
+            // 2. DRAW THE OVAL (on Line 2, bounded by Lines 1 and 3)
+            ctx.beginPath();
+            ctx.ellipse(420, 230, 150, 100, -0.5, 0, 2 * Math.PI);
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // 3. ANGLE THETA (θ)
+            ctx.beginPath();
+            ctx.arc(originX, originY, 80, -Math.atan2(310, 540), 0);
+            ctx.stroke();
+            ctx.fillText('θ', originX + 90, originY - 25);
+
+            // 4. FIRST δr ARC (Between angle and oval on line 2)
+            ctx.beginPath();
+            ctx.arc(170, 368, 15, -1.8, 1.2);
+            ctx.stroke();
+            ctx.fillText('δr', 160, 345);
+
+            // 5. INTERNAL ARCS AND LABELS (Smaller, first-quadrant sector style)
+            // Arc PR
+            ctx.beginPath();
+            ctx.arc(370, 255, 25, -Math.PI/2, 0); 
+            ctx.stroke();
+            ctx.fillText('P', 375, 285);
+            ctx.fillText('R', 335, 235);
+
+            // Arc SQ
+            ctx.beginPath();
+            ctx.arc(445, 210, 25, -Math.PI/2, 0);
+            ctx.stroke();
+            ctx.fillText('S', 480, 230);
+            ctx.fillText('Q', 450, 175);
+
+            // Second δr label between internal arcs
+            ctx.fillText('δr', 400, 245);
         }
 
-        function downloadImage() {
+        document.getElementById('downloadBtn').addEventListener('click', () => {
             const link = document.createElement('a');
-            link.download = 'calculus_final.png';
-            link.href = canvas.toDataURL();
+            link.download = 'mathematical_diagram.png';
+            link.href = canvas.toDataURL('image/png');
             link.click();
-        }
+        });
 
-        draw();
+        // Ensure font is loaded before drawing
+        document.fonts.ready.then(draw);
     </script>
 </body>
 </html>
